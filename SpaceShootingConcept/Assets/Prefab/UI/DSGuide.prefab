@@ -397,6 +397,7 @@ RectTransform:
   - {fileID: 4135212690294957689}
   - {fileID: 3719178915866343001}
   - {fileID: 3719178915668634799}
+  - {fileID: 1418880364991551622}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -422,7 +423,47 @@ MonoBehaviour:
   targetRigidbody: {fileID: 0}
   launchAnchor: {fileID: 0}
   projectileVelocity: 0
+  targetMeshRoot: {fileID: 0}
   colliderImage: {fileID: 4326947784896071107}
   originImage: {fileID: 8776194831059365523}
   targetImage: {fileID: 3719178915866343000}
   lineRenderer: {fileID: 3719178915668634798}
+  _shadowMeshFilterNest:
+    nest: {fileID: 1418880364991551622}
+    prefab: {fileID: 8305632391902089680, guid: 6899eef8547c7e3468db9517dabcb723, type: 3}
+--- !u!1 &3900445178260993107
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1418880364991551622}
+  m_Layer: 0
+  m_Name: ShadowMeshRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1418880364991551622
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3900445178260993107}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3719178916265071961}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}

@@ -11,6 +11,7 @@ public class DeflectionShootingGuide : MonoBehaviour
     public Rigidbody targetRigidbody;
     public Transform launchAnchor;
     public float projectileVelocity;
+    public Transform targetMeshRoot;
 
     [Header("Reference")]
     public Image colliderImage;
@@ -21,14 +22,16 @@ public class DeflectionShootingGuide : MonoBehaviour
     IzumiTools.ReuseNest<MeshFilter> _shadowMeshFilterNest;
 
     public Vector3 EstimateTargetPosition { get; private set; }
+    public Vector3 EstimateDelta => EstimateTargetPosition - targetRigidbody.position;
 
-    public void Init(Camera camera, Rigidbody launcherRigidbody, Rigidbody targetRigidbody, Transform launchAnchor, float projectileVelocity = 0)
+    public void Init(Camera camera, Rigidbody launcherRigidbody, Transform launchAnchor, float projectileVelocity, Rigidbody targetRigidbody, Transform targetMeshRoot)
     {
         this.camera = camera;
         this.launcherRigidbody = launcherRigidbody;
-        this.targetRigidbody = targetRigidbody;
         this.launchAnchor = launchAnchor;
         this.projectileVelocity = projectileVelocity;
+        this.targetRigidbody = targetRigidbody;
+        this.targetMeshRoot = targetMeshRoot;
     }
     private void Awake()
     {
@@ -36,30 +39,32 @@ public class DeflectionShootingGuide : MonoBehaviour
     }
     private void LateUpdate()
     {
-        //UpdateShadow(targetRigidbody.transform);
+        EstimatePosition();
+        UpdateShadow();
         UpdateGuideAndLine();
     }
-    private void UpdateShadow(Transform meshRoot)
+    private void EstimatePosition()
     {
-        _shadowMeshFilterNest.InactivateAll();
-        _shadowMeshFilterNest.nest.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-        foreach (var meshFilter in meshRoot.GetComponentsInChildren<MeshFilter>())
-        {
-            var shadow = _shadowMeshFilterNest.Get();
-            shadow.mesh = meshFilter.mesh;
-            shadow.transform.localPosition = meshRoot.InverseTransformPoint(meshFilter.transform.position);
-            shadow.transform.localRotation = Quaternion.Inverse(meshRoot.rotation) * meshFilter.transform.rotation;
-            shadow.transform.localScale = meshFilter.transform.lossyScale;
-        }
-    }
-    private void UpdateGuideAndLine()
-    {
-        float hitTimeEstimate =  IzumiTools.ExtendedMath.EstimateBulletFlightTimeOnDeflectionShooting(
+        float hitTimeEstimate = IzumiTools.ExtendedMath.EstimateBulletFlightTimeOnDeflectionShooting(
             launchAnchor.position,
             projectileVelocity,
             targetRigidbody.position,
             targetRigidbody.velocity - launcherRigidbody.velocity);
         EstimateTargetPosition = targetRigidbody.position + (targetRigidbody.velocity - launcherRigidbody.velocity) * hitTimeEstimate;
+    }
+    private void UpdateShadow()
+    {
+        _shadowMeshFilterNest.InactivateAll();
+        foreach (var meshFilter in targetMeshRoot.GetComponentsInChildren<MeshFilter>())
+        {
+            var shadow = _shadowMeshFilterNest.Get();
+            shadow.mesh = meshFilter.mesh;
+            shadow.transform.SetPositionAndRotation(meshFilter.transform.position + EstimateDelta, meshFilter.transform.rotation);
+            shadow.transform.localScale = meshFilter.transform.lossyScale;
+        }
+    }
+    private void UpdateGuideAndLine()
+    {
         lineRenderer.SetPositions(new Vector3[] {targetRigidbody.position, EstimateTargetPosition});
         float ymaxBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position + camera.transform.up * 100)).y;
         float yminBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position - camera.transform.up * 100)).y;

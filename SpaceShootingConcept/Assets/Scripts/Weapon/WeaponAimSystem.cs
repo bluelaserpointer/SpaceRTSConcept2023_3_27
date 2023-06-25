@@ -53,8 +53,8 @@ public class WeaponAimSystem : MonoBehaviour
         _dsGuideNest.InactivateAll();
         foreach (Rigidbody targetRigidbody in guideDSBodies)
         {
-            DeflectionShootingGuide guide = _dsGuideNest.Get(out bool _);
-            guide.Init(camera, Unit.Rigidbody, targetRigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity);
+            DeflectionShootingGuide guide = _dsGuideNest.Get();
+            guide.Init(camera, Unit.Rigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity, targetRigidbody, targetRigidbody.transform);
             if(_dsShadowMaker._targetObject == targetRigidbody.gameObject)
             {
                 estimateMainTargetPosition = guide.EstimateTargetPosition;
