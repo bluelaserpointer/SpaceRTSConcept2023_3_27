@@ -29,17 +29,34 @@ public class TestGunCrosshair : MonoBehaviour
             return;
         }
         Transform launchAnchor = Gun.LaunchAnchor;
-        Collider collider = WorldManager.WeaponAimSystem.BaseAimSurface;
-        float raycastDistance = collider.bounds.max.magnitude * 2;
-        Ray invertRay = new Ray(launchAnchor.position + launchAnchor.forward * raycastDistance, -launchAnchor.forward);
-        if (collider.Raycast(invertRay, out RaycastHit hitInfo, raycastDistance))
+        Ray gunRay = new Ray(launchAnchor.position, launchAnchor.forward);
+        bool hitAnything = false;
+        Vector3 estimateHitPos = Vector3.zero;
+        foreach (RaycastHit hitInfo in Physics.RaycastAll(gunRay, 1000))
         {
-            _displayRoot.SetActive(true);
-            transform.position = WorldManager.Player.Camera.WorldToScreenPoint(hitInfo.point);
+            GameObject hitObject = hitInfo.collider.gameObject;
+            UnitDamageCollider hitParts = hitObject.GetComponent<UnitDamageCollider>();
+            if (hitParts != null && hitParts.Unit != Gun.Unit)
+            {
+                estimateHitPos = hitInfo.point;
+                hitAnything = true;
+                break;
+            }
         }
-        else
+        if (!hitAnything)
         {
-            _displayRoot.SetActive(false);
+            Collider aimSurface = WorldManager.WeaponAimSystem.AimSurface;
+            float raycastDistance = aimSurface.bounds.max.magnitude * 2;
+            Ray invertGunRay = new Ray(launchAnchor.position + launchAnchor.forward * raycastDistance, -launchAnchor.forward);
+            if (aimSurface.Raycast(invertGunRay, out RaycastHit hitInfo, raycastDistance))
+            {
+                estimateHitPos = hitInfo.point;
+            }
+            else
+            {
+                print("<!> invert gun raycast failed");
+            }
         }
+        transform.position = WorldManager.Player.Camera.WorldToScreenPoint(estimateHitPos).Set(z: 0);
     }
 }

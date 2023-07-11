@@ -13,14 +13,13 @@ public class ShipUnit : Unit
     ShipMobility _mobility;
 
     [System.Serializable]
-    struct ShipMobility
+    public struct ShipMobility
     {
         public float main;
         public float sub;
         public float rotateForce;
         public Vector3 Output(Vector3 movementInput, bool useMainEngine)
         {
-            movementInput.Normalize();
             movementInput = movementInput.normalized * CurrentForse(useMainEngine);
             return movementInput;
         }
@@ -34,20 +33,31 @@ public class ShipUnit : Unit
     public override UnitBrain Brain => shipBrain;
     public readonly List<UnitDamageCollider> parts = new List<UnitDamageCollider>();
 
+    public ShipMobility Mobility => _mobility;
+    public float EngineForce => _mobility.CurrentForse(useMainEngine);
+    public float EngineTopAccel => EngineForce / Rigidbody.mass;
+
     [HideInInspector]
     public bool useMainEngine;
 
-    [HideInInspector]
-    public Vector3 MovementInput
+    public Vector3 RelativeMovementInput
     {
-        get => _movementInput;
+        get => _relativeMovementInput;
         set
         {
-            _movementInput = value;
-            _brakeMode = false;
+            _relativeMovementInput = value;
+            brakeMode = false;
         }
     }
-    [HideInInspector]
+    public Vector3 GlobalMovementInput
+    {
+        get => transform.TransformDirection(_relativeMovementInput);
+        set
+        {
+            _relativeMovementInput = transform.InverseTransformDirection(value);
+            brakeMode = false;
+        }
+    }
     public Vector3 RotationInput
     {
         get => _rotationInput;
@@ -58,20 +68,13 @@ public class ShipUnit : Unit
         }
     }
     [HideInInspector]
-    public bool BrakeMode {
-        get => _brakeMode;
-        set
-        {
-            _brakeMode = value;
-        }
-    }
+    public bool brakeMode;
     public bool FaceDirectionMode => _faceRotationMode;
     [HideInInspector]
     public Vector3 aimPosition;
 
-    Vector3 _movementInput;
+    Vector3 _relativeMovementInput;
     Vector3 _rotationInput;
-    bool _brakeMode;
     bool _faceRotationMode;
     Quaternion _targetRotation;
 
@@ -85,7 +88,9 @@ public class ShipUnit : Unit
             parts.Add(part);
         }
         if(shipBrain != null)
+        {
             shipBrain.OperatingShip = this;
+        }
     }
     private void LateUpdate()
     {
@@ -94,14 +99,14 @@ public class ShipUnit : Unit
         }
     }
     private void FixedUpdate()
-    {
-        if (_brakeMode)
+    {;
+        if (brakeMode)
         {
-            Rigidbody.velocity = Vector3.MoveTowards(Rigidbody.velocity, Vector3.zero, _mobility.CurrentForse(useMainEngine) / Rigidbody.mass * Time.fixedDeltaTime);
+            Rigidbody.velocity = Vector3.MoveTowards(Rigidbody.velocity, Vector3.zero, EngineTopAccel * Time.fixedDeltaTime);
         }
         else
         {
-            Rigidbody.AddForce(transform.TransformVector(_mobility.Output(MovementInput, useMainEngine)), ForceMode.Acceleration);
+            Rigidbody.AddForce(transform.TransformVector(_mobility.Output(RelativeMovementInput, useMainEngine)), ForceMode.Acceleration);
         }
         if (_faceRotationMode)
         {
@@ -113,10 +118,6 @@ public class ShipUnit : Unit
             Rigidbody.AddTorque(_mobility.rotateForce * xyRotation.normalized, ForceMode.Acceleration);
         }
         //transform.Rotate(_mobility.rotateSpeed * Vector3.forward * rotationInput.z);
-    }
-    public void Brake()
-    {
-        BrakeMode = true;
     }
     public void FaceRotation(Quaternion targetRotation)
     {

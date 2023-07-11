@@ -10,7 +10,6 @@ public class ShipPlayer : ShipBrain
     public Camp camp;
     [SerializeField]
     ShipUnit _testUnit;
-    public ShipUnit mainTarget;
 
     [Header("Reference")]
     [SerializeField]
@@ -224,16 +223,35 @@ public class ShipPlayer : ShipBrain
         if (thrustGear.Value == -1) //Hover
         {
             if (xInput == 0 && yInput == 0 && elevationInput == 0)
-                OperatingShip.Brake();
+                OperatingShip.brakeMode = true;
             else
-                OperatingShip.MovementInput = new Vector3(xInput, elevationInput, yInput);
+            {
+                OperatingShip.brakeMode = false;
+                OperatingShip.RelativeMovementInput = new Vector3(xInput, elevationInput, yInput);
+            }
         }
         else //Jet
         {
-            OperatingShip.MovementInput = new Vector3(KeyMovementMode ? xInput : 0, elevationInput,(float)thrustGear.Value / (thrustGear.Value < 0 ? -thrustGear.min : thrustGear.max));
+            OperatingShip.brakeMode = false;
+            Vector3 relativeMovementInput = new Vector3(KeyMovementMode ? xInput : 0, elevationInput,(float)thrustGear.Value / (thrustGear.Value < 0 ? -thrustGear.min : thrustGear.max));
+            //negate velocity of unwanted directions
+            if (!OperatingShip.brakeMode)
+            {
+                Vector3 velocity = OperatingShip.Rigidbody.velocity;
+                Vector3 UnwantedVelocity = velocity - Vector3.Project(velocity, OperatingShip.transform.forward);
+                Vector3 CorrectionInput = -UnwantedVelocity / OperatingShip.EngineTopAccel;
+                if (CorrectionInput.sqrMagnitude > 1)
+                {
+                    OperatingShip.GlobalMovementInput = CorrectionInput.normalized;
+                }
+                else
+                {
+                    OperatingShip.GlobalMovementInput = CorrectionInput + OperatingShip.transform.TransformDirection(relativeMovementInput) * Mathf.Sqrt(1 - CorrectionInput.sqrMagnitude);
+                }
+            }
         }
         //weapon select
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ActiveWeaponIndex = 0;
             UI.UpdateDisplay();

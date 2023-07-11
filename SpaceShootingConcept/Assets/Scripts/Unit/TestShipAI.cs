@@ -50,12 +50,11 @@ public class TestShipAI : ShipBrain
                 Vector3 estimateTargetPosition = targetEnemy.Rigidbody.position + (targetEnemy.Rigidbody.velocity - OperatingShip.Rigidbody.velocity) * estimateHitTime;
                 Quaternion targetRotation = Quaternion.LookRotation(estimateTargetPosition - OperatingShip.Rigidbody.position, OperatingShip.transform.up);
                 OperatingShip.FaceRotation(targetRotation);
-                OperatingShip.MovementInput = Vector3.forward * 1;
+                OperatingShip.RelativeMovementInput = Vector3.forward * 1;
                 if (Quaternion.Angle(OperatingShip.Rigidbody.rotation, targetRotation) < 5)
                 {
                     coaxialWeapons.ForEach(each => each.Trigger());
                 }
-
                 foreach (Weapon weapon in OperatingShip.weapons)
                 {
                     weapon.AimPosition(estimateTargetPosition);

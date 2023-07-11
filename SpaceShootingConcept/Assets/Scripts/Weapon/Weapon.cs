@@ -11,6 +11,7 @@ public abstract class Weapon : UnitModule
     public abstract void Init();
     public abstract GameObject GenerateCrosshair();
     public abstract void Trigger();
+    public abstract void Fire();
     public abstract void AimPosition(Vector3 position);
     public bool DeflectAim(Unit targetUnit)
     {

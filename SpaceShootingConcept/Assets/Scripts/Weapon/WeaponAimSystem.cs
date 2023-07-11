@@ -9,6 +9,7 @@ public class WeaponAimSystem : MonoBehaviour
     public new Camera camera;
     public List<Rigidbody> guideDSBodies;
     public List<Weapon> weapons;
+    public float baseAimDistance = 100;
 
     [Header("Reference")]
     [SerializeField]
@@ -16,14 +17,13 @@ public class WeaponAimSystem : MonoBehaviour
     [SerializeField]
     IzumiTools.ReuseNest<DeflectionShootingGuide> _dsGuideNest;
     [SerializeField]
-    DeflectShootingShadowMaker _dsShadowMaker;
-    [SerializeField]
-    Collider _baseAimSurface;
+    Collider _aimSurface;
     [SerializeField]
     BulletLineDrawer _bulletLineDrawer;
 
     public Unit Unit { get; private set; }
-    public Collider BaseAimSurface => _baseAimSurface;
+    public Collider AimSurface => _aimSurface;
+    public Vector3 AimPosition { get; private set; }
 
     readonly Dictionary<Weapon, GameObject> _weaponToCrosshair = new Dictionary<Weapon, GameObject>();
     Vector3 estimateMainTargetPosition;
@@ -55,11 +55,6 @@ public class WeaponAimSystem : MonoBehaviour
         {
             DeflectionShootingGuide guide = _dsGuideNest.Get();
             guide.Init(camera, Unit.Rigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity, targetRigidbody, targetRigidbody.transform);
-            if(_dsShadowMaker._targetObject == targetRigidbody.gameObject)
-            {
-                estimateMainTargetPosition = guide.EstimateTargetPosition;
-                _dsShadowMaker.SetEstimateTargetPosition(guide.EstimateTargetPosition);
-            }
         }
     }
     private void LateUpdate()
@@ -90,11 +85,11 @@ public class WeaponAimSystem : MonoBehaviour
             print("<!>weapon list empty...");
             return Vector3.zero;
         }
-        Vector3 aimPosition = Vector3.zero;
-        _baseAimSurface.transform.localScale = Vector3.one * Vector3.Distance(estimateMainTargetPosition, Unit.transform.position) / 2;
-        Ray cameraRay = new Ray(camera.transform.position, camera.transform.forward);
+        AimPosition = Vector3.zero;
+        _aimSurface.transform.localScale = Vector3.one * baseAimDistance;
+        Ray cameraRay = new Ray(camera.transform.position/* + camera.transform.forward * Vector3.Dot(Unit.transform.position - camera.transform.position, camera.transform.forward)*/, camera.transform.forward);
         bool hitAnything = false;
-        bool freeAimMode = false;
+        bool freeAimMode = true;
         if (freeAimMode)
         {
             foreach (RaycastHit hitInfo in Physics.RaycastAll(cameraRay, 1000))
@@ -103,7 +98,7 @@ public class WeaponAimSystem : MonoBehaviour
                 UnitDamageCollider hitParts = hitObject.GetComponent<UnitDamageCollider>();
                 if (hitParts != null && hitParts.Unit != Unit)
                 {
-                    aimPosition = hitInfo.point;
+                    AimPosition = hitInfo.point;
                     hitAnything = true;
                     break;
                 }
@@ -111,19 +106,19 @@ public class WeaponAimSystem : MonoBehaviour
         }
         if (!hitAnything)
         {
-            _baseAimSurface.transform.position = Unit.transform.position;
-            float sphereRadiusDouble = _baseAimSurface.bounds.max.magnitude * 2;
+            _aimSurface.transform.position = Unit.transform.position;
+            float sphereRadiusDouble = _aimSurface.bounds.max.magnitude * 2;
             Ray invertCameraRay = new Ray(cameraRay.origin + cameraRay.direction * sphereRadiusDouble, -cameraRay.direction);
-            //ray origin already in collider doesent hit, so we need invert the ray.
-            if (_baseAimSurface.Raycast(invertCameraRay, out RaycastHit hitInfo, sphereRadiusDouble))
+            //ray origin in collider doesent hit, so we need invert the ray.
+            if (_aimSurface.Raycast(invertCameraRay, out RaycastHit hitInfo, sphereRadiusDouble))
             {
-                aimPosition = hitInfo.point;
+                AimPosition = hitInfo.point;
             }
         }
         foreach (Weapon weapon in weapons)
         {
-            weapon.AimPosition(aimPosition);
+            weapon.AimPosition(AimPosition);
         }
-        return aimPosition;
+        return AimPosition;
     }
 }

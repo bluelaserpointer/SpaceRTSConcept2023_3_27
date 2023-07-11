@@ -99,7 +99,7 @@ public class ShipGun : Weapon
             Fire();
         }
     }
-    public void Fire()
+    public override void Fire()
     {
         TestBullet bullet = Instantiate(_bulletPrefab);
         bullet.transform.SetPositionAndRotation(_launchAnchor.position, _launchAnchor.rotation);
