@@ -34,32 +34,8 @@ public class FormationAI : ShipBrain
             Destroy(gameObject);
             return;
         }
-        Vector3 dstPos = Formation.transform.position + formationDeltaPosition;
-        Vector3 dstDelta = dstPos - OperatingShip.transform.position;
-        Vector3 dstDirection = dstDelta.normalized;
-        float distance = Vector3.Distance(dstPos, OperatingShip.transform.position);
-        if(distance > 5)
-        {
-            OperatingShip.brakeMode = false;
-            Vector3 velocity = OperatingShip.Rigidbody.velocity;
-            Vector3 UnwantedVelocity = velocity - Vector3.Project(velocity, dstDirection);
-            Vector3 CorrectionInput = -UnwantedVelocity / OperatingShip.EngineTopAccel;
-            if(CorrectionInput.sqrMagnitude > 1)
-            {
-                //print("correct " + name + ", " + CorrectionInput.sqrMagnitude);
-                OperatingShip.GlobalMovementInput = CorrectionInput.normalized;
-            }
-            else
-            {
-                //print("push " + name + ", " + CorrectionInput.sqrMagnitude);
-                OperatingShip.GlobalMovementInput = CorrectionInput + (dstPos - OperatingShip.transform.position).normalized * Mathf.Sqrt(1 - CorrectionInput.sqrMagnitude);
-            }
-        }
-        else
-        {
-            OperatingShip.brakeMode = true;
-        }
-        OperatingShip.FaceRotation(formationRotation);
+        OperatingShip.MoveTowards(Formation.transform.position + formationDeltaPosition, 5);
+        OperatingShip.RotateTowards(formationRotation);
 
         if(Formation.Fire)
         {

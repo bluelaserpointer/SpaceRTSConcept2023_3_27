@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 public class ShipPlayer : ShipBrain
 {
@@ -52,6 +51,8 @@ public class ShipPlayer : ShipBrain
     Sprite _keyRotationModeSprite, _mouseRotationModeSprite;
     [SerializeField]
     SpriteRenderer _xDirectionMarker, _yDirectionMarker;
+    [SerializeField]
+    GameObject _dockSelectGuide;
 
     public override Camp Camp => camp;
     public Camera Camera => _camera;
@@ -87,6 +88,10 @@ public class ShipPlayer : ShipBrain
     [HideInInspector]
     public readonly List<List<Weapon>> keyBindWeapons = new List<List<Weapon>>();
     public float AimDistance { get; private set; }
+    DockPort _selectingDockPort;
+    public bool IsDocked => OperatingShip.IsDocked;
+    public Transform NavigateTarget { get; private set; }
+    public bool Navigating => NavigateTarget != null;
 
     void Start()
     {
@@ -110,10 +115,10 @@ public class ShipPlayer : ShipBrain
             OperatingShip.visibility = ShipUnit.Visibility.Hide;
         else
             OperatingShip.visibility = ShipUnit.Visibility.Normal;
-        //camera repositioning
-        transform.position = OperatingShip.transform.position;
-        //rotation
+        //rotational components
         _rotationRoot.rotation = OperatingShip.Rigidbody.rotation;
+        //camera repositioning & rotationing
+        transform.position = OperatingShip.transform.position;
         _cameraRotationRoot.rotation = Camera.transform.rotation;
         Vector3 tmpVec;
         if((tmpVec = OperatingShip.transform.forward.Set(y: 0)).sqrMagnitude > 0.01F)
@@ -121,10 +126,44 @@ public class ShipPlayer : ShipBrain
         if ((tmpVec = Camera.transform.forward.Set(y: 0)).sqrMagnitude > 0.01F)
             _yRotationRoot.rotation = Quaternion.LookRotation(tmpVec);
         _zRotationGuideRoot.rotation = Quaternion.LookRotation(OperatingShip.Rigidbody.transform.forward);
-        //control guide resizing
+        //control guide rotationing & resizing
         _controlGuideRoot.localScale = Vector3.one * OperatingShip.testRadius / _controlGuideSize * Vector3.Distance(Camera.transform.position, _controlGuideRoot.position) / _controlGuideDisplayBaseDistance * Camera.GetComponent<ExponentialCameraFOVController>().AppliedChangeRatio;
         Vector3 toCameraVec = Camera.transform.TransformDirection(Camera.transform.InverseTransformDirection(Camera.transform.position - transform.position).Set(z: 0));
         _controlGuideRoot.localPosition = toCameraVec * (1 - _fovController.AppliedChangeRatio);
+        //input operations
+        UpdateMoveOperation();
+        UpdateWeaponOperation();
+        UpdateDockOperation();
+    }
+    private void UpdateMoveOperation()
+    {
+        if (IsDocked)
+        {
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                OperatingShip.LeaveDock();
+                thrustGear.Value = 1;
+            }
+            return;
+        }
+        if (Navigating)
+        {
+            OperatingShip.MoveTowards(NavigateTarget.position, 5);
+            OperatingShip.RotateTowards(NavigateTarget.rotation);
+            if (Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.C) || Input.GetKeyDown(KeyCode.B)
+                || Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+            {
+                NavigateTarget = null;
+                if (OperatingShip.AssignedDockPort != null)
+                {
+                    OperatingShip.LeaveDock();
+                }
+            }
+            else
+            {
+                return;
+            }
+        }
         //engine gear change
         if (Input.GetKeyDown(KeyCode.Z))
             --thrustGear.Value;
@@ -154,7 +193,7 @@ public class ShipPlayer : ShipBrain
         float elevationInput = Input.GetAxisRaw("Elevation");
         if (KeyMovementMode)
         {
-            OperatingShip.FaceRotation(Camera.transform.rotation);
+            OperatingShip.RotateTowards(Camera.transform.rotation);
         }
         else //keyRotationMode
         {
@@ -233,7 +272,7 @@ public class ShipPlayer : ShipBrain
         else //Jet
         {
             OperatingShip.brakeMode = false;
-            Vector3 relativeMovementInput = new Vector3(KeyMovementMode ? xInput : 0, elevationInput,(float)thrustGear.Value / (thrustGear.Value < 0 ? -thrustGear.min : thrustGear.max));
+            Vector3 relativeMovementInput = new Vector3(KeyMovementMode ? xInput : 0, elevationInput, (float)thrustGear.Value / (thrustGear.Value < 0 ? -thrustGear.min : thrustGear.max));
             //negate velocity of unwanted directions
             if (!OperatingShip.brakeMode)
             {
@@ -243,13 +282,18 @@ public class ShipPlayer : ShipBrain
                 if (CorrectionInput.sqrMagnitude > 1)
                 {
                     OperatingShip.GlobalMovementInput = CorrectionInput.normalized;
+                    OperatingShip.EnginePowerRatioInput = 1;
                 }
                 else
                 {
                     OperatingShip.GlobalMovementInput = CorrectionInput + OperatingShip.transform.TransformDirection(relativeMovementInput) * Mathf.Sqrt(1 - CorrectionInput.sqrMagnitude);
+                    OperatingShip.EnginePowerRatioInput = 1;
                 }
             }
         }
+    }
+    private void UpdateWeaponOperation()
+    {
         //weapon select
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
@@ -263,7 +307,8 @@ public class ShipPlayer : ShipBrain
             UI.UpdateDisplay();
             KeyMovementMode = ActiveWeapons[0].Coaxial;
         }
-
+        if (IsDocked)
+            return;
         //weapon aim
         WorldManager.WeaponAimSystem.UpdateAim();
         //weapon trigger
@@ -274,6 +319,56 @@ public class ShipPlayer : ShipBrain
                 weapon.Trigger();
             }
         }
+    }
+    private void UpdateDockOperation()
+    {
+        if (IsDocked)
+        {
+            _selectingDockPort = null;
+        }
+        else
+        {
+            if (OperatingShip.AssignedDockPort != null && Vector3.Distance(OperatingShip.transform.position, OperatingShip.AssignedDockPort.transform.position) < 1)
+            {
+                OperatingShip.Dock();
+            }
+            else
+            {
+                _selectingDockPort = SelectDockPortByCameraRay();
+            }
+        }
+        if (_selectingDockPort == null)
+        {
+            _dockSelectGuide.gameObject.SetActive(false);
+        }
+        else
+        {
+            _dockSelectGuide.gameObject.SetActive(true);
+            _dockSelectGuide.transform.SetPositionAndRotation(_selectingDockPort.transform.position, _selectingDockPort.transform.rotation);
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                if(OperatingShip.PrepareDock(_selectingDockPort))
+                {
+                    thrustGear.Value = thrustGear.min;
+                    NavigateTarget = _selectingDockPort.transform;
+                }
+            }
+        }
+    }
+    private DockPort SelectDockPortByCameraRay()
+    {
+        Ray cameraRay = new Ray(Camera.transform.position, Camera.transform.forward);
+        float minDistance = float.MaxValue;
+        Dock closestDock = null;
+        foreach (var hitInfo in Physics.RaycastAll(cameraRay, 1000, LayerMask.GetMask("Dock")))
+        {
+            if(hitInfo.distance < minDistance)
+            {
+                minDistance = hitInfo.distance;
+                closestDock = hitInfo.collider.GetComponent<Dock>();
+            }
+        }
+        return closestDock?.SuggestPortByRaySelect(cameraRay, 1000);
     }
     public override void OnControlShipChange(ShipUnit oldShip, ShipUnit newShip)
     {

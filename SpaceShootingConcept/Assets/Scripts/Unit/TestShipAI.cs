@@ -49,7 +49,7 @@ public class TestShipAI : ShipBrain
                     targetEnemy.Rigidbody.velocity - OperatingShip.Rigidbody.velocity);
                 Vector3 estimateTargetPosition = targetEnemy.Rigidbody.position + (targetEnemy.Rigidbody.velocity - OperatingShip.Rigidbody.velocity) * estimateHitTime;
                 Quaternion targetRotation = Quaternion.LookRotation(estimateTargetPosition - OperatingShip.Rigidbody.position, OperatingShip.transform.up);
-                OperatingShip.FaceRotation(targetRotation);
+                OperatingShip.RotateTowards(targetRotation);
                 OperatingShip.RelativeMovementInput = Vector3.forward * 1;
                 if (Quaternion.Angle(OperatingShip.Rigidbody.rotation, targetRotation) < 5)
                 {
@@ -62,7 +62,7 @@ public class TestShipAI : ShipBrain
             }
             else
             {
-                OperatingShip.FaceRotation(Quaternion.LookRotation(targetEnemy.transform.position - OperatingShip.transform.position, OperatingShip.transform.up));
+                OperatingShip.RotateTowards(Quaternion.LookRotation(targetEnemy.transform.position - OperatingShip.transform.position, OperatingShip.transform.up));
             }
         }
     }

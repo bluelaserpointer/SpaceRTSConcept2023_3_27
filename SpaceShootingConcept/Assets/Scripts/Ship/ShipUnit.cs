@@ -1,6 +1,7 @@
 using IzumiTools;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -16,15 +17,18 @@ public class ShipUnit : Unit
     [SerializeField]
     GameObject _destructedPrefab;
 
+    public DockPort AssignedDockPort { get; private set; }
+    public bool IsDocked { get; private set; }
+
     [System.Serializable]
     public struct ShipMobility
     {
         public float main;
         public float sub;
         public float rotateForce;
-        public Vector3 Output(Vector3 movementInput, bool useMainEngine)
+        public Vector3 Output(Vector3 movementInput, bool useMainEngine, float powerRatio)
         {
-            movementInput = movementInput.normalized * CurrentForse(useMainEngine);
+            movementInput = movementInput.normalized * CurrentForse(useMainEngine) * powerRatio;
             return movementInput;
         }
         public float CurrentForse(bool useMainEngine)
@@ -62,6 +66,15 @@ public class ShipUnit : Unit
             brakeMode = false;
         }
     }
+    public float EnginePowerRatioInput
+    {
+        get => _enginePowerRatioInput;
+        set
+        {
+            _enginePowerRatioInput = Mathf.Clamp(value, 0, 1);
+            brakeMode = false;
+        }
+    }
     public Vector3 RotationInput
     {
         get => _rotationInput;
@@ -76,6 +89,7 @@ public class ShipUnit : Unit
     public bool FaceDirectionMode => _faceRotationMode;
 
     Vector3 _relativeMovementInput;
+    float _enginePowerRatioInput = 1;
     Vector3 _rotationInput;
     bool _faceRotationMode;
     Quaternion _targetRotation;
@@ -108,7 +122,7 @@ public class ShipUnit : Unit
         }
         else
         {
-            Rigidbody.AddForce(transform.TransformVector(_mobility.Output(RelativeMovementInput, useMainEngine)), ForceMode.Acceleration);
+            Rigidbody.AddForce(transform.TransformVector(_mobility.Output(RelativeMovementInput, useMainEngine, EnginePowerRatioInput)), ForceMode.Acceleration);
         }
         if (_faceRotationMode)
         {
@@ -121,7 +135,49 @@ public class ShipUnit : Unit
         }
         //transform.Rotate(_mobility.rotateSpeed * Vector3.forward * rotationInput.z);
     }
-    public void FaceRotation(Quaternion targetRotation)
+    public void MoveTowards(Vector3 targetPosition, float brakeDistance)
+    {
+        Vector3 dstDelta = targetPosition - transform.position;
+        Vector3 dstDirection = dstDelta.normalized;
+        float distance = Vector3.Distance(targetPosition, transform.position);
+        if (distance > brakeDistance)
+        {
+            brakeMode = false;
+            Vector3 velocity = Rigidbody.velocity;
+            Vector3 orientedVelocity = Vector3.Project(velocity, dstDirection);
+            Vector3 disorientedVelocity = velocity - orientedVelocity;
+            Vector3 correctionInput = -disorientedVelocity / EngineTopAccel;
+            if (correctionInput.sqrMagnitude > 1)
+            {
+                //print("correct " + name + ", " + CorrectionInput.sqrMagnitude);
+                GlobalMovementInput = correctionInput.normalized;
+                EnginePowerRatioInput = 1;
+            }
+            else
+            {
+                //print("push " + name + ", " + CorrectionInput.sqrMagnitude);
+                float moveTowardsInput = (ExtendedMath.OptimalVelocityStopAt(distance, EngineTopAccel) - orientedVelocity.magnitude) / EngineTopAccel;
+                if (moveTowardsInput > 1)
+                {
+                    GlobalMovementInput = correctionInput + dstDirection * Mathf.Sqrt(1 - correctionInput.sqrMagnitude);
+                }
+                else
+                {
+                    Vector3 combinedInput = correctionInput + moveTowardsInput * dstDirection;
+                    float combinedInputMagnitude = combinedInput.magnitude;
+                    GlobalMovementInput = combinedInput.normalized;
+                    EnginePowerRatioInput = combinedInputMagnitude / 1;
+                }
+                //
+
+            }
+        }
+        else
+        {
+            brakeMode = true;
+        }
+    }
+    public void RotateTowards(Quaternion targetRotation)
     {
         _faceRotationMode = true;
         _targetRotation = targetRotation;
@@ -144,5 +200,31 @@ public class ShipUnit : Unit
         if(_destructedPrefab != null)
             Instantiate(_destructedPrefab).transform.SetPositionAndRotation(transform.position, transform.rotation);
         Destroy(gameObject);
+    }
+    public bool PrepareDock(DockPort port)
+    {
+        if (AssignedDockPort != null)
+        {
+            LeaveDock();
+        }
+        if(port.Assign(this))
+        {
+            AssignedDockPort = port;
+            return true;
+        }
+        return false;
+    }
+    public void Dock()
+    {
+        IsDocked = true;
+        Rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        AssignedDockPort.OnDock(this);
+    }
+    public void LeaveDock()
+    {
+        IsDocked = false;
+        Rigidbody.constraints = RigidbodyConstraints.None;
+        AssignedDockPort.OnLeaving(this);
+        AssignedDockPort = null;
     }
 }

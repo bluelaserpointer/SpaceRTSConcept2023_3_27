@@ -14,16 +14,27 @@ public static class TransformExtension
         }
         return null;
     }
-    public static T FindComponentInChildren<T>(this Transform parentTransform, Predicate<T> predicate)
+    public static T FindComponentInDirectChildren<T>(this Transform parentTransform, Predicate<T> predicate = null) where T : Component
     {
 
         foreach (Transform childTransform in parentTransform)
         {
             T component = childTransform.GetComponent<T>();
-            if (component != null && predicate.Invoke(component))
+            if (component != null && (predicate?.Invoke(component) ?? true))
                 return component;
         }
-        return default(T);
+        return default;
+    }
+    public static List<T> FindComponentsInDirectChildren<T>(this Transform parentTransform, Predicate<T> predicate = null) where T : Component
+    {
+        List<T> components = new List<T>();
+        foreach (Transform childTransform in parentTransform)
+        {
+            T component = childTransform.GetComponent<T>();
+            if (component != null && (predicate?.Invoke(component) ?? true))
+                components.Add(component);
+        }
+        return components;
     }
     public static void DestroyAllChildren(this Transform parent)
     {
