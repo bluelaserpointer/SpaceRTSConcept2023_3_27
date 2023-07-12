@@ -10,12 +10,14 @@ public abstract class Bullet : MonoBehaviour
     GameObject _spawnWhenHit;
     [SerializeField]
     Transform _detachOnDestory;
+
     public Rigidbody Rigidbody { get; private set; }
     public Vector3 SpawnPosition { get; private set; }
     public float SpawnTime { get; private set; }
-    public Damage ExpectedDamage { get; private set; }
     public Unit LaunchUnit => LaunchWeaon?.Unit;
     public Weapon LaunchWeaon { get; private set; }
+    [HideInInspector]
+    public Damage expectedDamage;
     [HideInInspector]
     public float lifetime;
     private void Awake()
@@ -32,12 +34,12 @@ public abstract class Bullet : MonoBehaviour
     {
         if (target.TryGetComponent(out UnitDamageCollider parts))
         {
-            var feedback = parts.BulletHit(this, ExpectedDamage);
+            var feedback = parts.BulletHit(this, expectedDamage);
             return feedback.isHit;
         }
         return false;
     }
-    public virtual void Hit(Vector3 point)
+    public virtual void OnHit(Vector3 point)
     {
         if (_spawnWhenHit != null)
             Instantiate(_spawnWhenHit).transform.SetPositionAndRotation(point, transform.rotation);
@@ -49,11 +51,11 @@ public abstract class Bullet : MonoBehaviour
         {
             Destroy();
         }
-        foreach(var hitInfo in Physics.RaycastAll(transform.position, transform.forward, Rigidbody.velocity.magnitude * Time.fixedDeltaTime))
+        foreach (var hitInfo in Physics.RaycastAll(transform.position, transform.forward, Rigidbody.velocity.magnitude * Time.fixedDeltaTime))
         {
-            if(HitCheck(hitInfo.collider.gameObject))
+            if (HitCheck(hitInfo.collider.gameObject))
             {
-                Hit(hitInfo.point);
+                OnHit(hitInfo.point);
                 break;
             }
         }

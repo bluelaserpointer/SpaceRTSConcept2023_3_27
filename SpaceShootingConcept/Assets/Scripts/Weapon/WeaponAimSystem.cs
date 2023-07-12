@@ -19,11 +19,12 @@ public class WeaponAimSystem : MonoBehaviour
     [SerializeField]
     Collider _aimSurface;
     [SerializeField]
+    AutoTargetModule _autoTargetModule;
+    [SerializeField]
     BulletLineDrawer _bulletLineDrawer;
 
     public Unit Unit { get; private set; }
     public Collider AimSurface => _aimSurface;
-    public Vector3 AimPosition { get; private set; }
 
     readonly Dictionary<Weapon, GameObject> _weaponToCrosshair = new Dictionary<Weapon, GameObject>();
     Vector3 estimateMainTargetPosition;
@@ -78,30 +79,36 @@ public class WeaponAimSystem : MonoBehaviour
             _bulletLineDrawer.LineRenderer.enabled = false;
         }
     }
-    public Vector3 UpdateAim()
+    public void UpdateAim()
     {
         if (weapons.Count == 0)
         {
             print("<!>weapon list empty...");
-            return Vector3.zero;
         }
-        AimPosition = Vector3.zero;
+        if (!_autoTargetModule.Avaliable)
+        {
+            AimOnCameraRay();
+        }
+        else
+        {
+            _autoTargetModule.HelpTarget(weapons);
+        }
+    }
+    public void AimOnCameraRay()
+    {
+        Vector3 aimPosition = Vector3.zero;
         _aimSurface.transform.localScale = Vector3.one * baseAimDistance;
         Ray cameraRay = new Ray(camera.transform.position/* + camera.transform.forward * Vector3.Dot(Unit.transform.position - camera.transform.position, camera.transform.forward)*/, camera.transform.forward);
         bool hitAnything = false;
-        bool freeAimMode = true;
-        if (freeAimMode)
+        foreach (RaycastHit hitInfo in Physics.RaycastAll(cameraRay, 1000))
         {
-            foreach (RaycastHit hitInfo in Physics.RaycastAll(cameraRay, 1000))
+            GameObject hitObject = hitInfo.collider.gameObject;
+            UnitDamageCollider hitParts = hitObject.GetComponent<UnitDamageCollider>();
+            if (hitParts != null && hitParts.Unit != Unit)
             {
-                GameObject hitObject = hitInfo.collider.gameObject;
-                UnitDamageCollider hitParts = hitObject.GetComponent<UnitDamageCollider>();
-                if (hitParts != null && hitParts.Unit != Unit)
-                {
-                    AimPosition = hitInfo.point;
-                    hitAnything = true;
-                    break;
-                }
+                aimPosition = hitInfo.point;
+                hitAnything = true;
+                break;
             }
         }
         if (!hitAnything)
@@ -112,13 +119,12 @@ public class WeaponAimSystem : MonoBehaviour
             //ray origin in collider doesent hit, so we need invert the ray.
             if (_aimSurface.Raycast(invertCameraRay, out RaycastHit hitInfo, sphereRadiusDouble))
             {
-                AimPosition = hitInfo.point;
+                aimPosition = hitInfo.point;
             }
         }
         foreach (Weapon weapon in weapons)
         {
-            weapon.AimPosition(AimPosition);
+            weapon.AimPosition(aimPosition);
         }
-        return AimPosition;
     }
 }

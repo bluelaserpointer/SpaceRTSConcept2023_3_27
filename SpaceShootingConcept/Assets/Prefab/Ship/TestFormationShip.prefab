@@ -4892,7 +4892,7 @@ GameObject:
   - component: {fileID: 5225471537614057394}
   m_Layer: 0
   m_Name: TestFormationShip
-  m_TagString: Untagged
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4945,12 +4945,14 @@ MonoBehaviour:
   shipBrain: {fileID: 0}
   testRadius: 0
   visibility: 0
+  health: 100
   _mobility:
     main: 20
     sub: 12
     rotateForce: 8
+  _destructedPrefab: {fileID: 8381709595511239484, guid: ddcc9d91a3668aa45b0414ad0025b2a3, type: 3}
   useMainEngine: 0
-  aimPosition: {x: 0, y: 0, z: 0}
+  brakeMode: 0
 --- !u!1 &6843839092025379593
 GameObject:
   m_ObjectHideFlags: 0

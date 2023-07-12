@@ -5,5 +5,5 @@ using UnityEngine;
 public struct UnitEffectFeedback
 {
     public float damage;
-    public bool unitKill;
+    public bool kill;
 }

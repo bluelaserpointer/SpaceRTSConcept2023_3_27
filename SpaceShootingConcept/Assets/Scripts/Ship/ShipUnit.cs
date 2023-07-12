@@ -10,7 +10,11 @@ public class ShipUnit : Unit
     public float testRadius;
     public Visibility visibility;
     [SerializeField]
+    public float health;
+    [SerializeField]
     ShipMobility _mobility;
+    [SerializeField]
+    GameObject _destructedPrefab;
 
     [System.Serializable]
     public struct ShipMobility
@@ -70,8 +74,6 @@ public class ShipUnit : Unit
     [HideInInspector]
     public bool brakeMode;
     public bool FaceDirectionMode => _faceRotationMode;
-    [HideInInspector]
-    public Vector3 aimPosition;
 
     Vector3 _relativeMovementInput;
     Vector3 _rotationInput;
@@ -123,5 +125,24 @@ public class ShipUnit : Unit
     {
         _faceRotationMode = true;
         _targetRotation = targetRotation;
+    }
+    public override UnitEffectFeedback Damage(Damage damage)
+    {
+        UnitEffectFeedback feedback = new UnitEffectFeedback();
+        health -= damage.damage;
+        feedback.damage = damage.damage;
+        if (health < 0)
+        {
+            Death();
+            feedback.kill = true;
+        }
+        return feedback;
+    }
+    public override void Death()
+    {
+        base.Death();
+        if(_destructedPrefab != null)
+            Instantiate(_destructedPrefab).transform.SetPositionAndRotation(transform.position, transform.rotation);
+        Destroy(gameObject);
     }
 }

@@ -7,6 +7,8 @@ using DG.Tweening;
 public class ShipGun : Weapon
 {
     [SerializeField]
+    Damage expectedDamage;
+    [SerializeField]
     bool _coaxial;
     [SerializeField]
     Transform _xRotateJoint;
@@ -27,8 +29,6 @@ public class ShipGun : Weapon
     [SerializeField]
     Vector2 _yRotateRange = new Vector2(-180, 180);
     [SerializeField]
-    BulletHitFeedback _damage;
-    [SerializeField]
     float _launchVelocity;
     [SerializeField]
     float _range;
@@ -48,13 +48,15 @@ public class ShipGun : Weapon
     public Vector3 TargetAimPosition { get; private set; }
     public bool HasTargetAimPosition { get; private set; }
 
+    public override Damage ExpectedDamage => expectedDamage;
+
     Tweener _xRotateTween, _yRotateTween;
     public Quaternion _targetAimRotation;
     private void Awake()
     {
         Init();
-        _xRotateTween = _xRotateJoint.DOLocalRotate(Vector3.zero, _rotateRequiredTime).SetEase(Ease.OutExpo).SetAutoKill(false);
-        _yRotateTween = _yRotateJoint.DOLocalRotate(Vector3.zero, _rotateRequiredTime).SetEase(Ease.OutExpo).SetAutoKill(false);
+        _xRotateTween = _xRotateJoint.DOLocalRotate(Vector3.zero, _rotateRequiredTime).SetEase(Ease.OutExpo).SetAutoKill(false).SetLink(gameObject);
+        _yRotateTween = _yRotateJoint.DOLocalRotate(Vector3.zero, _rotateRequiredTime).SetEase(Ease.OutExpo).SetAutoKill(false).SetLink(gameObject);
     }
     private void LateUpdate()
     {
@@ -104,7 +106,7 @@ public class ShipGun : Weapon
         TestBullet bullet = Instantiate(_bulletPrefab);
         bullet.transform.SetPositionAndRotation(_launchAnchor.position, _launchAnchor.rotation);
         bullet.Rigidbody.velocity = _launchAnchor.forward * _launchVelocity + Unit.Rigidbody.velocity;
-        //bullet.damage = _damage;
+        bullet.expectedDamage = expectedDamage;
         bullet.lifetime = _range / _launchVelocity;
         bullet.Init(this);
     }

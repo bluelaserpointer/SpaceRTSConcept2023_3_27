@@ -29,6 +29,11 @@ public class FormationAI : ShipBrain
     }
     private void Update()
     {
+        if (OperatingShip == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Vector3 dstPos = Formation.transform.position + formationDeltaPosition;
         Vector3 dstDelta = dstPos - OperatingShip.transform.position;
         Vector3 dstDirection = dstDelta.normalized;

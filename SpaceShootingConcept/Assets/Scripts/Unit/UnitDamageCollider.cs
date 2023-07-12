@@ -26,8 +26,7 @@ public class UnitDamageCollider : MonoBehaviour
         else
         {
             feedback.isHit = true;
-            feedback.effect = new UnitEffectFeedback();
-            feedback.effect.damage = damage.damage;
+            feedback.effect = Unit.Damage(damage);
         }
         return feedback;
     }

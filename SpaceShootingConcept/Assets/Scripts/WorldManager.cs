@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,17 +29,9 @@ public class WorldManager : MonoBehaviour
             Time.timeScale = Time.timeScale == 0 ? 1 : 0;
         }
     }
-    public List<Unit> GetAllUnits()
+    public List<Unit> GetUnits(Predicate<Unit> predicate = null)
     {
-        List<Unit> units = new List<Unit>();
-        foreach(Transform t in transform)
-        {
-            if(t.TryGetComponent(out Unit unit))
-            {
-                units.Add(unit);
-            }
-        }
-        return units;
+        return GameObjectExtension.FindComponentsWithTag(Unit.Tag, predicate);
     }
     public bool TryGetNearstEnemy(Unit myUnit, out Unit enemy)
     {

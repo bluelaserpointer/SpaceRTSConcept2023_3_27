@@ -265,7 +265,7 @@ public class ShipPlayer : ShipBrain
         }
 
         //weapon aim
-        OperatingShip.aimPosition = WorldManager.WeaponAimSystem.UpdateAim();
+        WorldManager.WeaponAimSystem.UpdateAim();
         //weapon trigger
         if (Input.GetMouseButton(0))
         {

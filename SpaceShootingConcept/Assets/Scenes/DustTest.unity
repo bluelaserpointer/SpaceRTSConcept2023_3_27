@@ -919,6 +919,7 @@ MonoBehaviour:
     nest: {fileID: 993088157}
     prefab: {fileID: 3719178916265071960, guid: b9b77fe7abc4087419b292ca4985fac5, type: 3}
   _aimSurface: {fileID: 1886562306}
+  _autoTargetModule: {fileID: 1973836984}
   _bulletLineDrawer: {fileID: 576243583}
 --- !u!4 &175371089
 Transform:
@@ -2032,6 +2033,7 @@ GameObject:
   m_Component:
   - component: {fileID: 354652680}
   - component: {fileID: 354652681}
+  - component: {fileID: 354652682}
   m_Layer: 0
   m_Name: AutoTargetSystemCanvas
   m_TagString: Untagged
@@ -2082,6 +2084,29 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 1
   m_TargetDisplay: 0
+--- !u!114 &354652682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 354652679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 1
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!1 &369075303
 GameObject:
   m_ObjectHideFlags: 0
@@ -2198,7 +2223,7 @@ Transform:
   - {fileID: 2074845028}
   - {fileID: 250861152}
   m_Father: {fileID: 511953005}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &387544194
 MonoBehaviour:
@@ -2670,7 +2695,7 @@ PrefabInstance:
       objectReference: {fileID: 1354967275}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 9
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2894,7 +2919,6 @@ Transform:
   - {fileID: 2074748356}
   - {fileID: 175646317}
   - {fileID: 1633335089}
-  - {fileID: 1892036032}
   - {fileID: 387544193}
   - {fileID: 1542901978}
   - {fileID: 88326722}
@@ -3836,10 +3860,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -4596,7 +4620,7 @@ PrefabInstance:
       objectReference: {fileID: 1582155749}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 12
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4923,7 +4947,7 @@ PrefabInstance:
       objectReference: {fileID: 25989233}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 13
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6416,7 +6440,7 @@ PrefabInstance:
       objectReference: {fileID: 1284449648}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 11
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -7197,7 +7221,7 @@ PrefabInstance:
       objectReference: {fileID: 2066883357}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -7334,7 +7358,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1341923117
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7369,7 +7393,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -18340,7 +18364,7 @@ PrefabInstance:
       objectReference: {fileID: 2074845027}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 14
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -19645,37 +19669,6 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 100
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &1892036031
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1892036032}
-  m_Layer: 0
-  m_Name: UnitControllers
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1892036032
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1892036031}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 511953005}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1911641836
 GameObject:
   m_ObjectHideFlags: 0
@@ -19776,7 +19769,7 @@ PrefabInstance:
       objectReference: {fileID: 250861151}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 15
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -19884,9 +19877,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 829bc44c365f112469b79f4cf9a20de9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effectiveAreaPx: 200
+  effectiveAreaPx: 300
   _targetMarkerNest:
-    nest: {fileID: 0}
+    nest: {fileID: 1704594206}
     prefab: {fileID: 7561714336048679984, guid: 7685e208a71068945a8d8231c0f67fe6, type: 3}
   effectiveAreaRect: {fileID: 1341923118}
 --- !u!4 &1973836985
@@ -20391,7 +20384,7 @@ GameObject:
   - component: {fileID: 2074748354}
   m_Layer: 0
   m_Name: TestCarrier
-  m_TagString: Untagged
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -20411,13 +20404,14 @@ MonoBehaviour:
   shipBrain: {fileID: 0}
   testRadius: 0
   visibility: 0
+  health: 5000
   _mobility:
     main: 0
     sub: 0
     rotateForce: 0
+  _destructedPrefab: {fileID: 0}
   useMainEngine: 0
   brakeMode: 0
-  aimPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &2074748355
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -21002,7 +20996,7 @@ GameObject:
   - component: {fileID: 2123054842}
   m_Layer: 0
   m_Name: TestEnemyShip
-  m_TagString: Untagged
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -21022,13 +21016,14 @@ MonoBehaviour:
   shipBrain: {fileID: 175646318}
   testRadius: 0
   visibility: 0
+  health: 100
   _mobility:
     main: 20
     sub: 12
     rotateForce: 8
+  _destructedPrefab: {fileID: 0}
   useMainEngine: 0
   brakeMode: 0
-  aimPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &2123054843
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -21461,7 +21456,7 @@ PrefabInstance:
       objectReference: {fileID: 2055656621}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_RootOrder
-      value: 8
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 5225471537614057395, guid: c3ac07a45923d864b84cef0cfb2c607e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -21518,7 +21513,7 @@ GameObject:
   - component: {fileID: 8409775736452237193}
   m_Layer: 0
   m_Name: PlayingShip
-  m_TagString: Untagged
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -21596,13 +21591,14 @@ MonoBehaviour:
   shipBrain: {fileID: 1239645699}
   testRadius: 24
   visibility: 0
+  health: 1000
   _mobility:
     main: 20
     sub: 12
     rotateForce: 8
+  _destructedPrefab: {fileID: 0}
   useMainEngine: 0
   brakeMode: 0
-  aimPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &8409775736452237193
 Rigidbody:
   m_ObjectHideFlags: 0

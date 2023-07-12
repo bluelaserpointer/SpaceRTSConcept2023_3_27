@@ -6,6 +6,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public abstract class Unit : MonoBehaviour
 {
+    public static string Tag = "Unit";
     public abstract UnitBrain Brain { get; }
     public Camp Camp => Brain?.Camp;
     public readonly List<UnitModule> modules = new List<UnitModule>();
@@ -26,9 +27,8 @@ public abstract class Unit : MonoBehaviour
             }
         }
     }
-    public virtual void Damage(Damage damage)
-    {
-        //Health -= damage.damage;
+    public abstract UnitEffectFeedback Damage(Damage damage);
+    public virtual void Death() {
     }
     public bool IsEnemy(Unit unit)
     {

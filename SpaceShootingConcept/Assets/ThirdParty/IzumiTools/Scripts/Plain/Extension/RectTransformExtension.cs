@@ -2,13 +2,13 @@
 
 public static class RectTransformExtension
 {
-    public static bool RectangleContainsScreenPoint(this RectTransform rectTransform, Vector2 screenPoint)
+    public static bool ContainsPoint(this RectTransform rectTransform, Vector2 screenPoint)
     {
         return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, screenPoint);
     }
-    public static bool RectangleContainsMousePoint(this RectTransform rectTransform)
+    public static bool ContainsMousePoint(this RectTransform rectTransform)
     {
-        return rectTransform.RectangleContainsScreenPoint(Input.mousePosition);
+        return rectTransform.ContainsPoint(Input.mousePosition);
     }
     public static bool Overlaps(this RectTransform a, RectTransform b)
     {

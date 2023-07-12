@@ -79,6 +79,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2dc152a0344b904abadde78e8fd2d5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  expectedDamage:
+    damage: 10
   _coaxial: 0
   _xRotateJoint: {fileID: 8770420740982650681}
   _yRotateJoint: {fileID: 8770420741181488262}
@@ -89,8 +91,6 @@ MonoBehaviour:
   _launchAnchor: {fileID: 7430991638398696993}
   _xRotateRange: {x: -30, y: 90}
   _yRotateRange: {x: -180, y: 180}
-  _damage:
-    isHit: 0
   _launchVelocity: 500
   _range: 2000
   _fireCD:

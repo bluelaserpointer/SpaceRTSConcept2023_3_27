@@ -5,6 +5,7 @@ using UnityEngine;
 
 public abstract class Weapon : UnitModule
 {
+    public abstract Damage ExpectedDamage { get; }
     public abstract Transform LaunchAnchor { get; }
     public abstract float ProjectileAvgVelocity { get; }
     public abstract bool Coaxial { get; }

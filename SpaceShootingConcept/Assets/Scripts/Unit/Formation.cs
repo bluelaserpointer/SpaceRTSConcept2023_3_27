@@ -28,6 +28,8 @@ public class Formation : MonoBehaviour
         Vector3 avgPos = Vector3.zero;
         for (int i = 0; i < ais.Count; i++)
         {
+            if (ais[i] == null || ais[i].OperatingShip == null)
+                continue;
             int layer = 0;
             for (int capacity = LayerCapacity(0); capacity < i + 1;)
             {
