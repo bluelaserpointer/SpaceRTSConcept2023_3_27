@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class FormationAI : ShipBrain
 {
-    public Camp camp;
-    public override Camp Camp => camp;
-
     List<Weapon> weapons = new List<Weapon>();
     public Formation Formation
     {
@@ -45,5 +42,9 @@ public class FormationAI : ShipBrain
                 weapon.Trigger();
             }
         }
+    }
+
+    public override void Request(UnitRequest request)
+    {
     }
 }

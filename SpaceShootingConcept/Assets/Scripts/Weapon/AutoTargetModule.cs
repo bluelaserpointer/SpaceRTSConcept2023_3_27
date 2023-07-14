@@ -26,6 +26,8 @@ public class AutoTargetModule : MonoBehaviour
     }
     private void Update()
     {
+        if (UserUnit == null)
+            return;
         UpdateTarget();
     }
     public void Init(Camera camera, Unit userUnit)
@@ -37,7 +39,7 @@ public class AutoTargetModule : MonoBehaviour
     public void UpdateTarget()
     {
         _targetMarkerNest.InactivateAll();
-        List<Unit> targetableUnits = WorldManager.Instance.GetUnits(unit =>
+        List<Unit> targetableUnits = WorldManager.Instance.GetTargetableUnits(unit =>
         {
             if (!unit.IsEnemy(UserUnit))
             {

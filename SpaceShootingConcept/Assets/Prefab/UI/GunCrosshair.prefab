@@ -51,6 +51,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _displayRoot: {fileID: 5644421558324004582}
+  _guideImage: {fileID: 5644421558324004584}
 --- !u!1 &5644421558324004582
 GameObject:
   m_ObjectHideFlags: 0

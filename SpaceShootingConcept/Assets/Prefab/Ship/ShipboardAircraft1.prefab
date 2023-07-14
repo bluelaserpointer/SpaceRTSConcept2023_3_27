@@ -4843,7 +4843,7 @@ Transform:
   - {fileID: 5544321314787284211}
   - {fileID: 5544321313987359785}
   m_Father: {fileID: 5225471537614057395}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5225471536544335026
 GameObject:
@@ -4877,7 +4877,7 @@ Transform:
   - {fileID: 6576946115152706955}
   - {fileID: 3952150926908393186}
   m_Father: {fileID: 5225471537614057395}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5225471537614057392
 GameObject:
@@ -4891,7 +4891,7 @@ GameObject:
   - component: {fileID: 5225471537614057397}
   - component: {fileID: 5225471537614057394}
   m_Layer: 0
-  m_Name: TestFormationShip
+  m_Name: ShipboardAircraft1
   m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4909,6 +4909,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 6057784321600334570}
   - {fileID: 5225471536544335029}
   - {fileID: 5225471535556466016}
   m_Father: {fileID: 0}
@@ -4942,14 +4943,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab5209bbc1da5b647b8154ce58889dd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shipBrain: {fileID: 0}
+  shipBrain: {fileID: 5326976143153764859}
   testRadius: 0
   visibility: 0
   health: 100
   _mobility:
-    main: 20
-    sub: 12
-    rotateForce: 8
+    main: 6
+    sub: 2
+    rotateForce: 1
   _destructedPrefab: {fileID: 8381709595511239484, guid: ddcc9d91a3668aa45b0414ad0025b2a3, type: 3}
   useMainEngine: 0
   brakeMode: 0
@@ -9765,6 +9766,54 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!1 &7847571912227276235
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6057784321600334570}
+  - component: {fileID: 5326976143153764859}
+  m_Layer: 0
+  m_Name: FixedAI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6057784321600334570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7847571912227276235}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5225471537614057395}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5326976143153764859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7847571912227276235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac5cc21b54d2dff489760808893f227d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camp: {fileID: 0}
+  state: 0
+  camp: {fileID: 0}
+  targetEnemy: {fileID: 0}
 --- !u!1001 &5225471536000916000
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9831,8 +9880,8 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2d2848647c3d65f4abba83d625797694, type: 3}
   m_PrefabInstance: {fileID: 5225471536000916000}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &5273166274649358812
-MeshCollider:
+--- !u!65 &5225471536000916004
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -9841,10 +9890,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -3360712743851873758, guid: 2d2848647c3d65f4abba83d625797694, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.18460596, y: 0.11666622, z: 0.023924338}
+  m_Center: {x: 0, y: 0.017214399, z: 0.0005455517}
 --- !u!114 &5225471536000916005
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -94,4 +94,44 @@ public static class IListExtension
         }
         return default(T);
     }
+    public static T FindMin<T>(this IList<T> list, Func<T, float> evaluater, out float minValue)
+    {
+        T candidate = default;
+        float candidateValue = float.MaxValue;
+        foreach (T element in list)
+        {
+            float value = evaluater(element);
+            if (value < candidateValue)
+            {
+                candidate = element;
+                candidateValue = value;
+            }
+        }
+        minValue = candidateValue;
+        return candidate;
+    }
+    public static T FindMin<T>(this IList<T> list, Func<T, float> evaluater)
+    {
+        return list.FindMin(evaluater, out float _);
+    }
+    public static T FindMax<T>(this IList<T> list, Func<T, float> evaluater, out float maxValue)
+    {
+        T candidate = default;
+        float candidateValue = float.MinValue;
+        foreach (T element in list)
+        {
+            float value = evaluater(element);
+            if (value > candidateValue)
+            {
+                candidate = element;
+                candidateValue = value;
+            }
+        }
+        maxValue = candidateValue;
+        return candidate;
+    }
+    public static T FindMax<T>(this IList<T> list, Func<T, float> evaluater)
+    {
+        return list.FindMax(evaluater, out float _);
+    }
 }

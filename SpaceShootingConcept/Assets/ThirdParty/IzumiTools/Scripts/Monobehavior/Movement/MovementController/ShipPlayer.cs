@@ -6,7 +6,6 @@ using UnityEngine;
 public class ShipPlayer : ShipBrain
 {
     [Header("Test")]
-    public Camp camp;
     [SerializeField]
     ShipUnit _testUnit;
 
@@ -25,6 +24,10 @@ public class ShipPlayer : ShipBrain
     Transform _yRotationRoot;
     [SerializeField]
     ShipPlayUI _shipPlayUI;
+
+    [Header("Control")]
+    [SerializeField]
+    float disorientedVelocityBrakeScale;
 
     [Header("Control Guide")]
     [SerializeField]
@@ -54,7 +57,6 @@ public class ShipPlayer : ShipBrain
     [SerializeField]
     GameObject _dockSelectGuide;
 
-    public override Camp Camp => camp;
     public Camera Camera => _camera;
     public ShipPlayUI UI => _shipPlayUI;
 
@@ -74,6 +76,7 @@ public class ShipPlayer : ShipBrain
     }
     bool _keyMovementMode;
     Vector3Int _previousInputSign;
+    bool _flipYInput;
     public int ActiveWeaponIndex {
         get => _activeWeaponIndex;
         set
@@ -207,10 +210,7 @@ public class ShipPlayer : ShipBrain
             else
             {
                 int inputSign = xInput > 0 ? 1 : -1;
-                if (_previousInputSign.x != inputSign)
-                {
-                    _previousInputSign.x = inputSign;
-                }
+                _previousInputSign.x = inputSign;
                 _yRotateDirectionIndicator.gameObject.SetActive(true);
                 _yRotateDirectionIndicator.SetRotateDirection(xInput > 0);
                 _leftText.gameObject.SetActive(false);
@@ -226,10 +226,11 @@ public class ShipPlayer : ShipBrain
             else
             {
                 int inputSign = yInput > 0 ? 1 : -1;
-                if (_previousInputSign.y != inputSign)
+                if (_previousInputSign.y == 0)
                 {
-                    _previousInputSign.y = inputSign;
+                    _flipYInput = OperatingShip.transform.up.y < 0;
                 }
+                _previousInputSign.y = inputSign;
                 _xRotateDirectionIndicator.gameObject.SetActive(true);
                 _xRotateDirectionIndicator.SetRotateDirection(yInput > 0);
                 _upText.gameObject.SetActive(false);
@@ -246,7 +247,10 @@ public class ShipPlayer : ShipBrain
                 _zRotateDirectionIndicator.SetRotateDirection(rollInput > 0);
                 _zRotationTextRoot.gameObject.SetActive(false);
             }
-            OperatingShip.RotationInput = new Vector3(-yInput, xInput, -rollInput);
+            OperatingShip.RotationInput =
+                (OperatingShip.transform.up.y > 0 ? 1 : -1) * Vector3.Cross(Vector3.up, OperatingShip.transform.forward) * -yInput * (_flipYInput ? -1 : 1)
+                + Vector3.up * xInput
+                + OperatingShip.transform.forward * rollInput;
         }
         //mouse rotation indicator
         /*
@@ -272,22 +276,24 @@ public class ShipPlayer : ShipBrain
         else //Jet
         {
             OperatingShip.brakeMode = false;
-            Vector3 relativeMovementInput = new Vector3(KeyMovementMode ? xInput : 0, elevationInput, (float)thrustGear.Value / (thrustGear.Value < 0 ? -thrustGear.min : thrustGear.max));
+            float enginePowerRatio = (float)thrustGear.Value / thrustGear.max;
+            Vector3 relativeMovementInput = new Vector3(KeyMovementMode ? xInput : 0, elevationInput, enginePowerRatio);
             //negate velocity of unwanted directions
             if (!OperatingShip.brakeMode)
             {
                 Vector3 velocity = OperatingShip.Rigidbody.velocity;
-                Vector3 UnwantedVelocity = velocity - Vector3.Project(velocity, OperatingShip.transform.forward);
-                Vector3 CorrectionInput = -UnwantedVelocity / OperatingShip.EngineTopAccel;
+                Vector3 disorientedVelocity = velocity - Vector3.Project(velocity, OperatingShip.transform.forward);
+                disorientedVelocity *= disorientedVelocityBrakeScale;
+                Vector3 CorrectionInput = -disorientedVelocity / OperatingShip.EngineTopAccel;
                 if (CorrectionInput.sqrMagnitude > 1)
                 {
                     OperatingShip.GlobalMovementInput = CorrectionInput.normalized;
-                    OperatingShip.EnginePowerRatioInput = 1;
+                    OperatingShip.EnginePowerRatioInput = enginePowerRatio;
                 }
                 else
                 {
                     OperatingShip.GlobalMovementInput = CorrectionInput + OperatingShip.transform.TransformDirection(relativeMovementInput) * Mathf.Sqrt(1 - CorrectionInput.sqrMagnitude);
-                    OperatingShip.EnginePowerRatioInput = 1;
+                    OperatingShip.EnginePowerRatioInput = enginePowerRatio;
                 }
             }
         }
@@ -347,7 +353,7 @@ public class ShipPlayer : ShipBrain
             _dockSelectGuide.transform.SetPositionAndRotation(_selectingDockPort.transform.position, _selectingDockPort.transform.rotation);
             if (Input.GetKeyDown(KeyCode.E))
             {
-                if(OperatingShip.PrepareDock(_selectingDockPort))
+                if(OperatingShip.AssignDockPort(_selectingDockPort))
                 {
                     thrustGear.Value = thrustGear.min;
                     NavigateTarget = _selectingDockPort.transform;
@@ -362,10 +368,15 @@ public class ShipPlayer : ShipBrain
         Dock closestDock = null;
         foreach (var hitInfo in Physics.RaycastAll(cameraRay, 1000, LayerMask.GetMask("Dock")))
         {
-            if(hitInfo.distance < minDistance)
+            Dock dock = hitInfo.collider.GetComponent<Dock>();
+            if(dock.Unit.IsEnemy(this))
+            {
+                continue;
+            }
+            if (hitInfo.distance < minDistance)
             {
                 minDistance = hitInfo.distance;
-                closestDock = hitInfo.collider.GetComponent<Dock>();
+                closestDock = dock;
             }
         }
         return closestDock?.SuggestPortByRaySelect(cameraRay, 1000);
@@ -374,5 +385,9 @@ public class ShipPlayer : ShipBrain
     {
         thrustGear.Value = 0;
         UI.UpdateDisplay();
+    }
+
+    public override void Request(UnitRequest request)
+    {
     }
 }

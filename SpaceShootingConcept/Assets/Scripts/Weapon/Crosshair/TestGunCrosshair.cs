@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TestGunCrosshair : MonoBehaviour
 {
     [SerializeField]
     GameObject _displayRoot;
+    [SerializeField]
+    Image _guideImage;
 
     public ShipGun Gun
     {
@@ -25,7 +28,7 @@ public class TestGunCrosshair : MonoBehaviour
     {
         if (Gun == null)
         {
-            print("<!>gun null...(update)");
+            Destroy(gameObject);
             return;
         }
         Transform launchAnchor = Gun.LaunchAnchor;
@@ -58,5 +61,9 @@ public class TestGunCrosshair : MonoBehaviour
             }
         }
         transform.position = WorldManager.Player.Camera.WorldToScreenPoint(estimateHitPos).Set(z: 0);
+    }
+    public void SetInAimRange(bool cond)
+    {
+        _guideImage.color = cond ? Color.white : Color.red;
     }
 }

@@ -49,6 +49,7 @@ public class ShipGun : Weapon
     public bool HasTargetAimPosition { get; private set; }
 
     public override Damage ExpectedDamage => expectedDamage;
+    public TestGunCrosshair GeneratedCrosshair { get; private set; }
 
     Tweener _xRotateTween, _yRotateTween;
     public Quaternion _targetAimRotation;
@@ -71,10 +72,23 @@ public class ShipGun : Weapon
         {
             Vector3 localTargetAimPos = _aimOrigin.InverseTransformPoint(TargetAimPosition);
             float xzDistance = Mathf.Sqrt(localTargetAimPos.x * localTargetAimPos.x + localTargetAimPos.z * localTargetAimPos.z);
-            _xRotateTween.ChangeEndValue(Vector3.right * Mathf.Clamp(Mathf.Rad2Deg * Mathf.Atan2(-localTargetAimPos.y, xzDistance), -_xRotateRange.y, -_xRotateRange.x), true).Restart();
-            _yRotateTween.ChangeEndValue(Vector3.up * Mathf.Clamp(Mathf.Rad2Deg * Mathf.Atan2(localTargetAimPos.x, localTargetAimPos.z), _yRotateRange.x, _yRotateRange.y), true).Restart();
+            float clampOverflowX, clampOverflowY;
+            _xRotateTween.ChangeEndValue(Vector3.right * ExtendedMath.ClampAndGetOverflow(Mathf.Rad2Deg * Mathf.Atan2(-localTargetAimPos.y, xzDistance), -_xRotateRange.y, -_xRotateRange.x, out clampOverflowX), true).Restart();
+            _yRotateTween.ChangeEndValue(Vector3.up * ExtendedMath.ClampAndGetOverflow(Mathf.Rad2Deg * Mathf.Atan2(localTargetAimPos.x, localTargetAimPos.z), _yRotateRange.x, _yRotateRange.y, out clampOverflowY), true).Restart();
             // don't know why this doesn't work
             //targetRotation = Quaternion.LookRotation(TargetAimPosition - _aimOrigin.position, transform.up);
+            if (GeneratedCrosshair != null)
+            {
+                if (!Coaxial && (clampOverflowX != 0 || clampOverflowY != 0))
+                {
+                    //unstable aim (out of rotate range)
+                    GeneratedCrosshair.SetInAimRange(false);
+                }
+                else
+                {
+                    GeneratedCrosshair.SetInAimRange(true);
+                }
+            }
         }
         else
         {
@@ -114,6 +128,11 @@ public class ShipGun : Weapon
     {
         TestGunCrosshair crosshair = Instantiate(_crosshairPrefab);
         crosshair.Init(this);
+        GeneratedCrosshair = crosshair;
         return crosshair.gameObject;
+    }
+    public override GameObject GetGeneratedCrossHair()
+    {
+        return GeneratedCrosshair?.gameObject;
     }
 }

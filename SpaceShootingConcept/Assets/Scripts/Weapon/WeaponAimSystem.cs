@@ -23,21 +23,22 @@ public class WeaponAimSystem : MonoBehaviour
     [SerializeField]
     BulletLineDrawer _bulletLineDrawer;
 
-    public Unit Unit { get; private set; }
+    public Unit PlayingUnit { get; private set; }
     public Collider AimSurface => _aimSurface;
 
-    readonly Dictionary<Weapon, GameObject> _weaponToCrosshair = new Dictionary<Weapon, GameObject>();
     Vector3 estimateMainTargetPosition;
     private void Update()
     {
+        if (PlayingUnit == null)
+            return;
         //crosshair update
         List<Transform> usedCrosshairTfs = new List<Transform>();
         foreach (Weapon weapon in WorldManager.Player.ActiveWeapons)
         {
-            GameObject crosshairObj;
-            if (!_weaponToCrosshair.TryGetValue(weapon, out crosshairObj))
+            GameObject crosshairObj = weapon.GetGeneratedCrossHair();
+            if (crosshairObj == null)
             {
-                _weaponToCrosshair.Add(weapon, crosshairObj = weapon.GenerateCrosshair());
+                crosshairObj = weapon.GenerateCrosshair();
                 crosshairObj.transform.SetParent(_crosshairNest, false);
             }
             crosshairObj.SetActive(true);
@@ -55,7 +56,7 @@ public class WeaponAimSystem : MonoBehaviour
         foreach (Rigidbody targetRigidbody in guideDSBodies)
         {
             DeflectionShootingGuide guide = _dsGuideNest.Get();
-            guide.Init(camera, Unit.Rigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity, targetRigidbody, targetRigidbody.transform);
+            guide.Init(camera, PlayingUnit.Rigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity, targetRigidbody, targetRigidbody.transform);
         }
     }
     private void LateUpdate()
@@ -64,7 +65,7 @@ public class WeaponAimSystem : MonoBehaviour
     }
     public void SetUnit(Unit unit)
     {
-        Unit = unit;
+        PlayingUnit = unit;
     }
     public void SetWeapons(List<Weapon> weapons)
     {
@@ -72,7 +73,7 @@ public class WeaponAimSystem : MonoBehaviour
         if (weapons[0].Coaxial)
         {
             _bulletLineDrawer.LineRenderer.enabled = true;
-            _bulletLineDrawer.Init(Unit.Rigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity);
+            _bulletLineDrawer.Init(PlayingUnit.Rigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity);
         }
         else
         {
@@ -104,7 +105,7 @@ public class WeaponAimSystem : MonoBehaviour
         {
             GameObject hitObject = hitInfo.collider.gameObject;
             UnitDamageCollider hitParts = hitObject.GetComponent<UnitDamageCollider>();
-            if (hitParts != null && hitParts.Unit != Unit)
+            if (hitParts != null && hitParts.Unit != PlayingUnit)
             {
                 aimPosition = hitInfo.point;
                 hitAnything = true;
@@ -113,7 +114,7 @@ public class WeaponAimSystem : MonoBehaviour
         }
         if (!hitAnything)
         {
-            _aimSurface.transform.position = Unit.transform.position;
+            _aimSurface.transform.position = PlayingUnit.transform.position;
             float sphereRadiusDouble = _aimSurface.bounds.max.magnitude * 2;
             Ray invertCameraRay = new Ray(cameraRay.origin + cameraRay.direction * sphereRadiusDouble, -cameraRay.direction);
             //ray origin in collider doesent hit, so we need invert the ray.

@@ -1,7 +1,7 @@
 using IzumiTools;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
+using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -17,6 +17,7 @@ public class ShipUnit : Unit
     [SerializeField]
     GameObject _destructedPrefab;
 
+    public override bool IsDead => health <= 0;
     public DockPort AssignedDockPort { get; private set; }
     public bool IsDocked { get; private set; }
 
@@ -28,7 +29,7 @@ public class ShipUnit : Unit
         public float rotateForce;
         public Vector3 Output(Vector3 movementInput, bool useMainEngine, float powerRatio)
         {
-            movementInput = movementInput.normalized * CurrentForse(useMainEngine) * powerRatio;
+            movementInput = movementInput * CurrentForse(useMainEngine) * powerRatio;
             return movementInput;
         }
         public float CurrentForse(bool useMainEngine)
@@ -53,18 +54,15 @@ public class ShipUnit : Unit
         get => _relativeMovementInput;
         set
         {
-            _relativeMovementInput = value;
+            _relativeMovementInput = value.normalized;
             brakeMode = false;
+            _autoMoveMode = false;
         }
     }
     public Vector3 GlobalMovementInput
     {
         get => transform.TransformDirection(_relativeMovementInput);
-        set
-        {
-            _relativeMovementInput = transform.InverseTransformDirection(value);
-            brakeMode = false;
-        }
+        set => RelativeMovementInput = transform.InverseTransformDirection(value);
     }
     public float EnginePowerRatioInput
     {
@@ -73,6 +71,7 @@ public class ShipUnit : Unit
         {
             _enginePowerRatioInput = Mathf.Clamp(value, 0, 1);
             brakeMode = false;
+            _autoMoveMode = false;
         }
     }
     public Vector3 RotationInput
@@ -80,19 +79,22 @@ public class ShipUnit : Unit
         get => _rotationInput;
         set
         {
-            _rotationInput = value;
-            _faceRotationMode = false;
+            _rotationInput = value.normalized;
+            _autoRotationMode = false;
         }
     }
     [HideInInspector]
     public bool brakeMode;
-    public bool FaceDirectionMode => _faceRotationMode;
+    public bool FaceDirectionMode => _autoRotationMode;
 
     Vector3 _relativeMovementInput;
     float _enginePowerRatioInput = 1;
     Vector3 _rotationInput;
-    bool _faceRotationMode;
-    Quaternion _targetRotation;
+    bool _autoMoveMode;
+    Vector3 _autoMoveTarget;
+    float _autoMoveBrakeDistance;
+    bool _autoRotationMode;
+    Quaternion _autoRotateTarget;
 
     private void Awake()
     {
@@ -115,7 +117,47 @@ public class ShipUnit : Unit
         }
     }
     private void FixedUpdate()
-    {;
+    {
+        if (_autoMoveMode)
+        {
+            Vector3 dstDelta = _autoMoveTarget - transform.position;
+            Vector3 dstDirection = dstDelta.normalized;
+            float distance = Vector3.Distance(_autoMoveTarget, transform.position);
+            if (distance > _autoMoveBrakeDistance)
+            {
+                brakeMode = false;
+                Vector3 velocity = Rigidbody.velocity;
+                Vector3 orientedVelocity = Vector3.Project(velocity, dstDirection);
+                Vector3 disorientedVelocity = velocity - orientedVelocity;
+                Vector3 correctionInput = -disorientedVelocity / EngineTopAccel;
+                if (correctionInput.sqrMagnitude > 1)
+                {
+                    //print("correct " + name + ", " + CorrectionInput.sqrMagnitude);
+                    GlobalMovementInput = correctionInput.normalized;
+                    EnginePowerRatioInput = 1;
+                }
+                else
+                {
+                    //print("push " + name + ", " + CorrectionInput.sqrMagnitude);
+                    float moveTowardsInput = (ExtendedMath.OptimalVelocityStopAt(distance, EngineTopAccel) - orientedVelocity.magnitude) / EngineTopAccel;
+                    if (moveTowardsInput > 1)
+                    {
+                        GlobalMovementInput = correctionInput + dstDirection * Mathf.Sqrt(1 - correctionInput.sqrMagnitude);
+                    }
+                    else
+                    {
+                        Vector3 combinedInput = correctionInput + moveTowardsInput * dstDirection;
+                        float combinedInputMagnitude = combinedInput.magnitude;
+                        GlobalMovementInput = combinedInput.normalized;
+                        EnginePowerRatioInput = combinedInputMagnitude / 1;
+                    }
+                }
+            }
+            else
+            {
+                brakeMode = true;
+            }
+        }
         if (brakeMode)
         {
             Rigidbody.velocity = Vector3.MoveTowards(Rigidbody.velocity, Vector3.zero, EngineTopAccel * Time.fixedDeltaTime);
@@ -124,63 +166,25 @@ public class ShipUnit : Unit
         {
             Rigidbody.AddForce(transform.TransformVector(_mobility.Output(RelativeMovementInput, useMainEngine, EnginePowerRatioInput)), ForceMode.Acceleration);
         }
-        if (_faceRotationMode)
+        if (_autoRotationMode)
         {
-            Rigidbody.angularVelocity = ToRotaionByOptimalAccel.OptimalAngularVelocityTowardsRotation(Rigidbody, _targetRotation, _mobility.rotateForce / Rigidbody.mass);
+            Rigidbody.angularVelocity = ToRotaionByOptimalAccel.OptimalAngularVelocityTowardsRotation(Rigidbody, _autoRotateTarget, _mobility.rotateForce / Rigidbody.mass);
         }
         else
         {
-            Vector3 xyRotation = Vector3.Cross(Vector3.up, transform.forward) * RotationInput.x + Vector3.up * RotationInput.y;
-            Rigidbody.AddTorque(_mobility.rotateForce * xyRotation.normalized, ForceMode.Acceleration);
+            Rigidbody.AddTorque(_mobility.rotateForce * RotationInput, ForceMode.Acceleration);
         }
-        //transform.Rotate(_mobility.rotateSpeed * Vector3.forward * rotationInput.z);
     }
     public void MoveTowards(Vector3 targetPosition, float brakeDistance)
     {
-        Vector3 dstDelta = targetPosition - transform.position;
-        Vector3 dstDirection = dstDelta.normalized;
-        float distance = Vector3.Distance(targetPosition, transform.position);
-        if (distance > brakeDistance)
-        {
-            brakeMode = false;
-            Vector3 velocity = Rigidbody.velocity;
-            Vector3 orientedVelocity = Vector3.Project(velocity, dstDirection);
-            Vector3 disorientedVelocity = velocity - orientedVelocity;
-            Vector3 correctionInput = -disorientedVelocity / EngineTopAccel;
-            if (correctionInput.sqrMagnitude > 1)
-            {
-                //print("correct " + name + ", " + CorrectionInput.sqrMagnitude);
-                GlobalMovementInput = correctionInput.normalized;
-                EnginePowerRatioInput = 1;
-            }
-            else
-            {
-                //print("push " + name + ", " + CorrectionInput.sqrMagnitude);
-                float moveTowardsInput = (ExtendedMath.OptimalVelocityStopAt(distance, EngineTopAccel) - orientedVelocity.magnitude) / EngineTopAccel;
-                if (moveTowardsInput > 1)
-                {
-                    GlobalMovementInput = correctionInput + dstDirection * Mathf.Sqrt(1 - correctionInput.sqrMagnitude);
-                }
-                else
-                {
-                    Vector3 combinedInput = correctionInput + moveTowardsInput * dstDirection;
-                    float combinedInputMagnitude = combinedInput.magnitude;
-                    GlobalMovementInput = combinedInput.normalized;
-                    EnginePowerRatioInput = combinedInputMagnitude / 1;
-                }
-                //
-
-            }
-        }
-        else
-        {
-            brakeMode = true;
-        }
+        _autoMoveMode = true;
+        _autoMoveTarget = targetPosition;
+        _autoMoveBrakeDistance = brakeDistance;
     }
     public void RotateTowards(Quaternion targetRotation)
     {
-        _faceRotationMode = true;
-        _targetRotation = targetRotation;
+        _autoRotationMode = true;
+        _autoRotateTarget = targetRotation;
     }
     public override UnitEffectFeedback Damage(Damage damage)
     {
@@ -199,9 +203,11 @@ public class ShipUnit : Unit
         base.Death();
         if(_destructedPrefab != null)
             Instantiate(_destructedPrefab).transform.SetPositionAndRotation(transform.position, transform.rotation);
+        if (AssignedDockPort != null)
+            AssignedDockPort.OnLeaving(this);
         Destroy(gameObject);
     }
-    public bool PrepareDock(DockPort port)
+    public bool AssignDockPort(DockPort port)
     {
         if (AssignedDockPort != null)
         {

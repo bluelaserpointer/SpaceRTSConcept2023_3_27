@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class Dock : MonoBehaviour
+public class Dock : UnitModule
 {
     [SerializeField]
     Collider _mainColldier;
