@@ -66,19 +66,17 @@ namespace IzumiTools
             return (distance > 0 ? 1 : -1) * Mathf.Sqrt(2 * maxAccel * Mathf.Abs(distance));
         }
         /// <summary>
-        /// Used for deflection shooting, returns the bullet flight time if there exists an aim direction could hit the moving target. 
+        /// Used for deflection shooting, returns the bullet flight time if there exists an aim direction could hit the moving target.
         /// </summary>
-        /// <param name="firePosition"></param>
-        /// <param name="bulletSpeed"></param>
-        /// <param name="targetPosition"></param>
-        /// <param name="targetSpeed"></param>
+        /// <param name="relativePosition">myPosition - targetPosition</param>
+        /// <param name="relativeVelocity">myVelocity - targetVelocity</param>
+        /// <param name="bulletSpeed">average bullet velocity magnitude</param>
         /// <returns>The time, negative if impossible to hit the target</returns>
-        public static float EstimateBulletFlightTimeOnDeflectionShooting(Vector3 firePosition, float bulletSpeed, Vector3 targetPosition, Vector3 targetSpeed)
+        public static float EstimateBulletFlightTimeOnDeflectionShooting(Vector3 relativePosition, Vector3 relativeVelocity, float bulletSpeed)
         {
-            Vector3 deltaPosition = targetPosition - firePosition;
-            float a = targetSpeed.sqrMagnitude - bulletSpeed * bulletSpeed;
-            float b = 2*Vector3.Dot(targetSpeed, deltaPosition);
-            float c = deltaPosition.sqrMagnitude;
+            float a = relativeVelocity.sqrMagnitude - bulletSpeed * bulletSpeed;
+            float b = 2 * Vector3.Dot(relativeVelocity, relativePosition);
+            float c = relativePosition.sqrMagnitude;
             float delta = b * b - 4 * a * c;
             if (delta < 0)
             {
@@ -97,19 +95,19 @@ namespace IzumiTools
                 return bulletFlightTime;
             }
         }
-        public static bool TryDeflectShoot(Rigidbody myBody, Vector3 firePosition, float projectileVelocity, Rigidbody targetBody, Vector3 desiredHitPos, out Vector3 aimPosition)
+        public static bool TryDeflectShoot(Vector3 myPosition, Vector3 targetPosition, Vector3 relativeVelocity, float bulletSpeed, out Vector3 aimPosition)
         {
+            Vector3 relativePosition = targetPosition - myPosition;
             float estimateHitTime = EstimateBulletFlightTimeOnDeflectionShooting(
-                firePosition,
-                projectileVelocity,
-                desiredHitPos,
-                myBody.velocity - targetBody.velocity);
+                relativePosition,
+                relativeVelocity,
+                bulletSpeed);
             if (estimateHitTime < 0) //impossible hit target
             {
                 aimPosition = Vector3.zero;
                 return false;
             }
-            aimPosition = desiredHitPos + (targetBody.velocity - myBody.velocity) * estimateHitTime;
+            aimPosition = targetPosition + relativeVelocity * estimateHitTime;
             return true;
         }
     }

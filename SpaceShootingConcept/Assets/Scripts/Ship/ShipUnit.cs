@@ -15,6 +15,9 @@ public class ShipUnit : Unit
     [SerializeField]
     ShipMobility _mobility;
     [SerializeField]
+    [Range(0f, 1f)]
+    float _velocityRotateRatio;
+    [SerializeField]
     GameObject _destructedPrefab;
 
     public override bool IsDead => health <= 0;
@@ -166,14 +169,24 @@ public class ShipUnit : Unit
         {
             Rigidbody.AddForce(transform.TransformVector(_mobility.Output(RelativeMovementInput, useMainEngine, EnginePowerRatioInput)), ForceMode.Acceleration);
         }
+        //Vector3 originalVelocity = Rigidbody.velocity;
+        //Vector3.rot originalVelocity.
         if (_autoRotationMode)
         {
-            Rigidbody.angularVelocity = ToRotaionByOptimalAccel.OptimalAngularVelocityTowardsRotation(Rigidbody, _autoRotateTarget, _mobility.rotateForce / Rigidbody.mass);
+            if (Quaternion.Angle(Rigidbody.rotation, _autoRotateTarget) < 0.1F)
+                Rigidbody.angularVelocity = Vector3.MoveTowards(Rigidbody.angularVelocity, Vector3.zero, _mobility.rotateForce / Rigidbody.mass * Time.fixedDeltaTime);
+            else
+                Rigidbody.angularVelocity = ToRotaionByOptimalAccel.OptimalAngularVelocityTowardsRotation(Rigidbody, _autoRotateTarget, _mobility.rotateForce / Rigidbody.mass);
         }
         else
         {
             Rigidbody.AddTorque(_mobility.rotateForce * RotationInput, ForceMode.Acceleration);
         }
+        Quaternion oldRotation = Rigidbody.rotation;
+        Quaternion newRotation = oldRotation * Quaternion.Euler(Rigidbody.angularVelocity * Time.fixedDeltaTime);
+        Vector3 removeVelocity = Rigidbody.velocity * _velocityRotateRatio;
+        Vector3 applyVelocity = removeVelocity.magnitude * (newRotation * Vector3.forward);
+        Rigidbody.velocity += -removeVelocity + applyVelocity;
     }
     public void MoveTowards(Vector3 targetPosition, float brakeDistance)
     {
@@ -202,7 +215,11 @@ public class ShipUnit : Unit
     {
         base.Death();
         if(_destructedPrefab != null)
-            Instantiate(_destructedPrefab).transform.SetPositionAndRotation(transform.position, transform.rotation);
+        {
+            GameObject destructedObj = Instantiate(_destructedPrefab);
+            destructedObj.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            destructedObj.AddComponent<ConstantSpeed>().move = Rigidbody.velocity;
+        }
         if (AssignedDockPort != null)
             AssignedDockPort.OnLeaving(this);
         Destroy(gameObject);

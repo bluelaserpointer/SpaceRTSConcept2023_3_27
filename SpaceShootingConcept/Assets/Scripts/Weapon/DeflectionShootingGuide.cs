@@ -22,6 +22,7 @@ public class DeflectionShootingGuide : MonoBehaviour
     IzumiTools.ReuseNest<MeshFilter> _shadowMeshFilterNest;
 
     public Vector3 EstimateTargetPosition { get; private set; }
+    public bool Hitable { get; private set; }
     public Vector3 EstimateDelta => EstimateTargetPosition - targetRigidbody.position;
 
     public void Init(Camera camera, Rigidbody launcherRigidbody, Transform launchAnchor, float projectileVelocity, Rigidbody targetRigidbody, Transform targetMeshRoot)
@@ -45,12 +46,13 @@ public class DeflectionShootingGuide : MonoBehaviour
     }
     private void EstimatePosition()
     {
-        float hitTimeEstimate = IzumiTools.ExtendedMath.EstimateBulletFlightTimeOnDeflectionShooting(
+        Hitable = IzumiTools.ExtendedMath.TryDeflectShoot(
             launchAnchor.position,
-            projectileVelocity,
             targetRigidbody.position,
-            targetRigidbody.velocity - launcherRigidbody.velocity);
-        EstimateTargetPosition = targetRigidbody.position + (targetRigidbody.velocity - launcherRigidbody.velocity) * hitTimeEstimate;
+            targetRigidbody.velocity - launcherRigidbody.velocity,
+            projectileVelocity,
+            out Vector3 estimateTargetPosition);
+        EstimateTargetPosition = estimateTargetPosition;
     }
     private void UpdateShadow()
     {
@@ -65,7 +67,6 @@ public class DeflectionShootingGuide : MonoBehaviour
     }
     private void UpdateGuideAndLine()
     {
-        lineRenderer.SetPositions(new Vector3[] {targetRigidbody.position, EstimateTargetPosition});
         float ymaxBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position + camera.transform.up * 100)).y;
         float yminBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position - camera.transform.up * 100)).y;
         float xmaxBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position + camera.transform.right * 100)).x;
@@ -74,6 +75,17 @@ public class DeflectionShootingGuide : MonoBehaviour
         colliderImage.transform.position = new Vector2((xmaxBound + xminBound) / 2, (ymaxBound + yminBound) / 2);
         colliderImage.rectTransform.sizeDelta = boundSize;
         originImage.transform.position = camera.WorldToScreenPoint(targetRigidbody.position);
-        targetImage.transform.position = camera.WorldToScreenPoint(EstimateTargetPosition);
+        if (!Hitable)
+        {
+            lineRenderer.enabled = false;
+            targetImage.enabled = false;
+        }
+        else
+        {
+            lineRenderer.enabled = true;
+            targetImage.enabled = true;
+            lineRenderer.SetPositions(new Vector3[] { targetRigidbody.position, EstimateTargetPosition });
+            targetImage.transform.position = camera.WorldToScreenPoint(EstimateTargetPosition);
+        }
     }
 }

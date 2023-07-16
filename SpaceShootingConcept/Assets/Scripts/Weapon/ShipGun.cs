@@ -119,10 +119,12 @@ public class ShipGun : Weapon
     {
         TestBullet bullet = Instantiate(_bulletPrefab);
         bullet.transform.SetPositionAndRotation(_launchAnchor.position, _launchAnchor.rotation);
+        bullet.Rigidbody.position = bullet.transform.position;
         bullet.Rigidbody.velocity = _launchAnchor.forward * _launchVelocity + Unit.Rigidbody.velocity;
         bullet.expectedDamage = expectedDamage;
         bullet.lifetime = _range / _launchVelocity;
         bullet.Init(this);
+        //bullet.SetDebugLine(2500);
     }
     public override GameObject GenerateCrosshair()
     {

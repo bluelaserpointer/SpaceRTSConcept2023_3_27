@@ -58,22 +58,24 @@ public class TestShipAI : ShipBrain
         }
         float enemyDistance = Vector3.Distance(OperatingShip.transform.position, targetEnemy.transform.position);
         OperatingShip.RotateTowards(Quaternion.LookRotation(targetEnemy.transform.position - OperatingShip.transform.position, OperatingShip.transform.up));
-        float estimateHitTime = ExtendedMath.EstimateBulletFlightTimeOnDeflectionShooting(
+        bool hitable = ExtendedMath.TryDeflectShoot(
             coaxialWeapons[0].LaunchAnchor.position,
-            coaxialWeapons[0].ProjectileAvgVelocity,
             targetEnemy.Rigidbody.position,
-            targetEnemy.Rigidbody.velocity - OperatingShip.Rigidbody.velocity);
-        Vector3 estimateTargetPosition = targetEnemy.Rigidbody.position + (targetEnemy.Rigidbody.velocity - OperatingShip.Rigidbody.velocity) * estimateHitTime;
-        Quaternion targetRotation = Quaternion.LookRotation(estimateTargetPosition - OperatingShip.Rigidbody.position, OperatingShip.transform.up);
+            targetEnemy.Rigidbody.velocity - OperatingShip.Rigidbody.velocity,
+            coaxialWeapons[0].ProjectileAvgVelocity,
+            out Vector3 estimateAimPosition);
+        if (!hitable)
+            estimateAimPosition = targetEnemy.Rigidbody.position;
+        Quaternion targetRotation = Quaternion.LookRotation(estimateAimPosition - OperatingShip.Rigidbody.position, OperatingShip.transform.up);
         OperatingShip.RotateTowards(targetRotation);
         OperatingShip.RelativeMovementInput = Vector3.forward * 1;
-        if (Quaternion.Angle(OperatingShip.Rigidbody.rotation, targetRotation) < 5)
+        if (hitable && Quaternion.Angle(OperatingShip.Rigidbody.rotation, targetRotation) < 5)
         {
             coaxialWeapons.ForEach(each => each.Trigger());
         }
         foreach (Weapon weapon in coaxialWeapons)
         {
-            weapon.AimPosition(estimateTargetPosition);
+            weapon.AimPosition(estimateAimPosition);
         }
     }
     public void TargetNearstEnemy()

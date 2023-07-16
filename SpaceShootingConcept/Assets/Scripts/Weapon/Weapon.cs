@@ -16,11 +16,10 @@ public abstract class Weapon : UnitModule
     public bool DeflectAim(Unit targetUnit)
     {
         if (IzumiTools.ExtendedMath.TryDeflectShoot(
-                Unit.Rigidbody,
-                Unit.transform.position,
-                ProjectileAvgVelocity,
-                targetUnit.Rigidbody,
+                LaunchAnchor.position,
                 targetUnit.transform.position,
+                targetUnit.Rigidbody.velocity - Unit.Rigidbody.velocity,
+                ProjectileAvgVelocity,
                 out Vector3 aimPosition))
         {
             AimPosition(aimPosition);

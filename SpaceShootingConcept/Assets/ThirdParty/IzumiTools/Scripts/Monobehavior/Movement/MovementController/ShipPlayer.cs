@@ -250,7 +250,7 @@ public class ShipPlayer : ShipBrain
             OperatingShip.RotationInput =
                 (OperatingShip.transform.up.y > 0 ? 1 : -1) * Vector3.Cross(Vector3.up, OperatingShip.transform.forward) * -yInput * (_flipYInput ? -1 : 1)
                 + Vector3.up * xInput
-                + OperatingShip.transform.forward * rollInput;
+                + OperatingShip.transform.forward * -rollInput;
         }
         //mouse rotation indicator
         /*
