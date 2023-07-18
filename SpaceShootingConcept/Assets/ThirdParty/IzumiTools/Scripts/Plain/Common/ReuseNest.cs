@@ -44,7 +44,7 @@ namespace IzumiTools
             {
                 if (childTf.gameObject.activeSelf)
                     continue;
-                if((returnObject = childTf.GetComponent<T>()) != null)
+                if(childTf.TryGetComponent(out returnObject))
                 {
                     returnObject.gameObject.SetActive(true);
                     isNewGenerated = false;

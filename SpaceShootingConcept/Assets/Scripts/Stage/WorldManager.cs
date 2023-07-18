@@ -39,7 +39,7 @@ public class WorldManager : MonoBehaviour
     {
         if (MissionProgress == MissionProgressState.Playing)
         {
-            if (GetTargetableEnemies(Player.Camp).Count == 0)
+            if (GetTargetableEnemyUnits(Player.Camp).Count == 0)
             {
                 MissionProgress = MissionProgressState.Success;
             }
@@ -62,7 +62,7 @@ public class WorldManager : MonoBehaviour
     {
         return GameObjectExtension.FindComponentsWithTag<Unit>(Unit.Tag, unit => (predicate?.Invoke(unit) ?? true) && unit.gameObject.activeInHierarchy);
     }
-    public List<Unit> GetTargetableEnemies(Camp myCamp)
+    public List<Unit> GetTargetableEnemyUnits(Camp myCamp)
     {
         return GetTargetableUnits(unit => unit.IsEnemy(myCamp));
     }

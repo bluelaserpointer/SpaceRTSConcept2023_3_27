@@ -57,7 +57,6 @@ public class TestShipAI : ShipBrain
             return;
         }
         float enemyDistance = Vector3.Distance(OperatingShip.transform.position, targetEnemy.transform.position);
-        OperatingShip.RotateTowards(Quaternion.LookRotation(targetEnemy.transform.position - OperatingShip.transform.position, OperatingShip.transform.up));
         bool hitable = ExtendedMath.TryDeflectShoot(
             coaxialWeapons[0].LaunchAnchor.position,
             targetEnemy.Rigidbody.position,
@@ -80,7 +79,7 @@ public class TestShipAI : ShipBrain
     }
     public void TargetNearstEnemy()
     {
-        targetEnemy = WorldManager.Instance.GetTargetableEnemies(Camp).FindMin(enemy => Vector3.Distance(OperatingShip.transform.position, enemy.transform.position));
+        targetEnemy = WorldManager.Instance.GetTargetableEnemyUnits(Camp).FindMin(enemy => Vector3.Distance(OperatingShip.transform.position, enemy.transform.position));
         if (targetEnemy != null)
         {
             state = State.Attacking;

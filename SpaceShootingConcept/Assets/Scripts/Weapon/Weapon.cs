@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public abstract class Weapon : UnitModule
 {
+    public UnityEvent<BulletHitFeedback> OnHit = new UnityEvent<BulletHitFeedback>();
     public abstract Damage ExpectedDamage { get; }
     public abstract Transform LaunchAnchor { get; }
     public abstract float ProjectileAvgVelocity { get; }

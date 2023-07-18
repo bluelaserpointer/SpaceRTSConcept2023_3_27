@@ -84,5 +84,13 @@ public class AutoTargetModule : MonoBehaviour
     public void HelpTarget(List<Weapon> weapons)
     {
         weapons.ForEach(weapon => HelpTarget(weapon));
+        weaponAimSystem.guideDSBodies.Clear();
+        if (weapons.Find(weapon => weapon.Coaxial))
+        {
+            weaponAimSystem.guideDSBodies.Add(_targetUnit.Rigidbody);
+        }
     }
+    [SerializeField]
+
+    WeaponAimSystem weaponAimSystem;
 }

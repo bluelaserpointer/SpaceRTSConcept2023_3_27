@@ -25,8 +25,8 @@ public class WeaponAimSystem : MonoBehaviour
 
     public Unit PlayingUnit { get; private set; }
     public Collider AimSurface => _aimSurface;
+    public BulletLineDrawer BulletLineDrawer => _bulletLineDrawer;
 
-    Vector3 estimateMainTargetPosition;
     private void Update()
     {
         if (PlayingUnit == null)
@@ -53,15 +53,16 @@ public class WeaponAimSystem : MonoBehaviour
         }
         //ds guide update
         _dsGuideNest.InactivateAll();
-        foreach (Rigidbody targetRigidbody in guideDSBodies)
+        foreach (Rigidbody targetRigidbody in guideDSBodies.ToArray())
         {
+            if(targetRigidbody == null)
+            {
+                guideDSBodies.Remove(targetRigidbody);
+                continue;
+            }
             DeflectionShootingGuide guide = _dsGuideNest.Get();
             guide.Init(camera, PlayingUnit.Rigidbody, weapons[0].LaunchAnchor, weapons[0].ProjectileAvgVelocity, targetRigidbody, targetRigidbody.transform);
         }
-    }
-    private void LateUpdate()
-    {
-        
     }
     public void SetUnit(Unit unit)
     {

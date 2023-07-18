@@ -171,16 +171,17 @@ public class ShipUnit : Unit
         }
         //Vector3 originalVelocity = Rigidbody.velocity;
         //Vector3.rot originalVelocity.
+        float rotateForce = _mobility.rotateForce * (1 + (1 - EnginePowerRatioInput));
         if (_autoRotationMode)
         {
             if (Quaternion.Angle(Rigidbody.rotation, _autoRotateTarget) < 0.1F)
-                Rigidbody.angularVelocity = Vector3.MoveTowards(Rigidbody.angularVelocity, Vector3.zero, _mobility.rotateForce / Rigidbody.mass * Time.fixedDeltaTime);
+                Rigidbody.angularVelocity = Vector3.MoveTowards(Rigidbody.angularVelocity, Vector3.zero, rotateForce / Rigidbody.mass * Time.fixedDeltaTime);
             else
-                Rigidbody.angularVelocity = ToRotaionByOptimalAccel.OptimalAngularVelocityTowardsRotation(Rigidbody, _autoRotateTarget, _mobility.rotateForce / Rigidbody.mass);
+                Rigidbody.angularVelocity = ToRotaionByOptimalAccel.OptimalAngularVelocityTowardsRotation(Rigidbody, _autoRotateTarget, rotateForce / Rigidbody.mass);
         }
         else
         {
-            Rigidbody.AddTorque(_mobility.rotateForce * RotationInput, ForceMode.Acceleration);
+            Rigidbody.AddTorque(rotateForce * RotationInput, ForceMode.Acceleration);
         }
         Quaternion oldRotation = Rigidbody.rotation;
         Quaternion newRotation = oldRotation * Quaternion.Euler(Rigidbody.angularVelocity * Time.fixedDeltaTime);

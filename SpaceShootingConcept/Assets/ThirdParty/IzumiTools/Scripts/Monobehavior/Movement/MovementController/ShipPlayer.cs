@@ -82,7 +82,9 @@ public class ShipPlayer : ShipBrain
         set
         {
             _activeWeaponIndex = value;
+            KeyMovementMode = ActiveWeapons[0].Coaxial;
             WorldManager.WeaponAimSystem.SetWeapons(ActiveWeapons);
+            UI.UpdateDisplay();
         }
     }
     int _activeWeaponIndex;
@@ -304,14 +306,10 @@ public class ShipPlayer : ShipBrain
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ActiveWeaponIndex = 0;
-            UI.UpdateDisplay();
-            KeyMovementMode = ActiveWeapons[0].Coaxial;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             ActiveWeaponIndex = 1;
-            UI.UpdateDisplay();
-            KeyMovementMode = ActiveWeapons[0].Coaxial;
         }
         if (IsDocked)
             return;

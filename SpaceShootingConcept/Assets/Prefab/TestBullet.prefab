@@ -263,7 +263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1453678c54ea29147a3023ecd1f176e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _spawnWhenHit: {fileID: 100004, guid: b46890100828db6429ff69c322b45893, type: 3}
+  _spawnObjOnHit: {fileID: 100014, guid: 5332791ebce075d4a9e56f4581e7fb47, type: 3}
   _detachOnDestory: {fileID: 0}
   expectedDamage:
     damage: 0

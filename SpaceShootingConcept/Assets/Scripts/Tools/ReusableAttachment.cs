@@ -16,8 +16,8 @@ namespace IzumiTools
     [DisallowMultipleComponent]
     public abstract class ReusableAttachment<T> : MonoBehaviour where T : Component
     {
-        protected abstract T AttachedTarget { get; set; }
-        public abstract bool HasTarget { get; }
+        public abstract T MarkTarget { get; set; }
+        public virtual bool HasTarget => MarkTarget != null;
 
         private void LateUpdate()
         {
@@ -40,7 +40,7 @@ namespace IzumiTools
                 ReusableAttachment<T> attachment;
                 if (!child.TryGetComponent(out attachment))
                     continue;
-                if (attachment.AttachedTarget == target)
+                if (attachment.MarkTarget == target)
                     return attachment;
                 if (tmpAttachment == null && !attachment.HasTarget)
                     tmpAttachment = attachment;
@@ -48,12 +48,12 @@ namespace IzumiTools
             //search empty
             if (tmpAttachment != null)
             {
-                tmpAttachment.AttachedTarget = target;
+                tmpAttachment.MarkTarget = target;
                 return tmpAttachment;
             }
             //generate new one
             (tmpAttachment = Instantiate(this)).transform.SetParent(attachmentNest, false);
-            tmpAttachment.AttachedTarget = target;
+            tmpAttachment.MarkTarget = target;
             return tmpAttachment;
         }
     }

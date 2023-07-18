@@ -19,7 +19,9 @@ public class UnitDamageCollider : MonoBehaviour
     public virtual BulletHitFeedback BulletHit(Bullet bullet, Damage damage)
     {
         BulletHitFeedback feedback = new BulletHitFeedback();
-        if(bullet.LaunchUnit == Unit)
+        feedback.bullet = bullet;
+        feedback.damageCollier = this;
+        if (bullet.LaunchUnit == Unit)
         {
             feedback.isHit = false;
         }

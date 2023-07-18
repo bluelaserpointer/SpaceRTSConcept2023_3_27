@@ -7,7 +7,7 @@ using UnityEngine;
 public abstract class Bullet : MonoBehaviour
 {
     [SerializeField]
-    GameObject _spawnWhenHit;
+    GameObject _spawnObjOnHit;
     [SerializeField]
     Transform _detachOnDestory;
 
@@ -35,14 +35,15 @@ public abstract class Bullet : MonoBehaviour
         if (target.TryGetComponent(out UnitDamageCollider parts))
         {
             var feedback = parts.BulletHit(this, expectedDamage);
+            LaunchWeaon.OnHit.Invoke(feedback);
             return feedback.isHit;
         }
         return false;
     }
     public virtual void OnHit(Vector3 point)
     {
-        if (_spawnWhenHit != null)
-            Instantiate(_spawnWhenHit).transform.SetPositionAndRotation(point, transform.rotation);
+        if (_spawnObjOnHit != null)
+            Instantiate(_spawnObjOnHit).transform.SetPositionAndRotation(point, transform.rotation);
         Destroy();
     }
     protected virtual void Update()

@@ -50,7 +50,7 @@ namespace IzumiTools
             //rotation
             float sensitivity = sensitivityMouse;
             if (_fovController != null)
-                sensitivity *= _fovController.AppliedChangeRatio * _fovAffectSensitivityRatio;
+                sensitivity *= Mathf.Pow(_fovController.AppliedChangeRatio, _fovAffectSensitivityRatio);
             if (limitXAngleBetweenPoles)
             {
                 Vector3 xAxisEularAngles = xAxis.localEulerAngles;

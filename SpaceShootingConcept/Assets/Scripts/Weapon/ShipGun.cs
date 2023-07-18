@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.Events;
 
 public class ShipGun : Weapon
 {
@@ -52,7 +53,6 @@ public class ShipGun : Weapon
     public TestGunCrosshair GeneratedCrosshair { get; private set; }
 
     Tweener _xRotateTween, _yRotateTween;
-    public Quaternion _targetAimRotation;
     private void Awake()
     {
         Init();

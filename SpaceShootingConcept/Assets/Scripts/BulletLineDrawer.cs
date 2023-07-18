@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -11,6 +12,7 @@ public class BulletLineDrawer : MonoBehaviour
     public Transform launcherTransform;
     public float lineLength = 100;
     public LineRenderer LineRenderer { get; private set; }
+    public Ray LineRay { get; private set; }
 
     private void Awake()
     {
@@ -32,6 +34,7 @@ public class BulletLineDrawer : MonoBehaviour
         if (launcherRigidbody != null)
             direction += launcherRigidbody.velocity;
         direction.Normalize();
+        LineRay = new Ray(origin, direction);
         LineRenderer.SetPositions(new Vector3[] {origin, origin + direction * lineLength});
     }
 }

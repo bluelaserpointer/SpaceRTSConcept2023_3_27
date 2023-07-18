@@ -15,7 +15,6 @@ public class DeflectionShootingGuide : MonoBehaviour
 
     [Header("Reference")]
     public Image colliderImage;
-    public Image originImage;
     public Image targetImage;
     public LineRenderer lineRenderer;
     [SerializeField]
@@ -40,6 +39,11 @@ public class DeflectionShootingGuide : MonoBehaviour
     }
     private void LateUpdate()
     {
+        if (targetRigidbody == null || launcherRigidbody == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
         EstimatePosition();
         UpdateShadow();
         UpdateGuideAndLine();
@@ -74,7 +78,6 @@ public class DeflectionShootingGuide : MonoBehaviour
         Vector2 boundSize = new Vector2(Mathf.Abs(xmaxBound - xminBound), Mathf.Abs(ymaxBound - yminBound));
         colliderImage.transform.position = new Vector2((xmaxBound + xminBound) / 2, (ymaxBound + yminBound) / 2);
         colliderImage.rectTransform.sizeDelta = boundSize;
-        originImage.transform.position = camera.WorldToScreenPoint(targetRigidbody.position);
         if (!Hitable)
         {
             lineRenderer.enabled = false;

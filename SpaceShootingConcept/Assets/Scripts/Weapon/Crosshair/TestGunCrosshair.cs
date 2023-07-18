@@ -6,9 +6,11 @@ using UnityEngine.UI;
 public class TestGunCrosshair : MonoBehaviour
 {
     [SerializeField]
-    GameObject _displayRoot;
+    GameObject _aimMarker;
     [SerializeField]
-    Image _guideImage;
+    Image _aimMarkerMainImage;
+    [SerializeField]
+    HitIndicator _hitIndicator;
 
     public ShipGun Gun
     {
@@ -23,6 +25,7 @@ public class TestGunCrosshair : MonoBehaviour
     public void Init(ShipGun gun)
     {
         _gun = gun;
+        gun.OnHit.AddListener(feedback => _hitIndicator.Hit(feedback));
     }
     private void Update()
     {
@@ -60,10 +63,10 @@ public class TestGunCrosshair : MonoBehaviour
                 print("<!> invert gun raycast failed");
             }
         }
-        transform.position = WorldManager.Player.Camera.WorldToScreenPoint(estimateHitPos).Set(z: 0);
+        _aimMarker.transform.position = WorldManager.Player.Camera.WorldToScreenPoint(estimateHitPos).Set(z: 0);
     }
     public void SetInAimRange(bool cond)
     {
-        _guideImage.color = cond ? Color.white : Color.red;
+        _aimMarkerMainImage.color = cond ? Color.white : Color.red;
     }
 }
