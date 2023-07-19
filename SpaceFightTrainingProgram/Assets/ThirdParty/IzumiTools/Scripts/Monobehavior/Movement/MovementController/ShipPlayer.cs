@@ -84,7 +84,7 @@ public class ShipPlayer : ShipBrain
             _activeWeaponIndex = value;
             KeyMovementMode = ActiveWeapons[0].Coaxial;
             WorldManager.WeaponAimSystem.SetWeapons(ActiveWeapons);
-            UI.UpdateDisplay();
+            UI.UpdateUI();
         }
     }
     int _activeWeaponIndex;
@@ -102,11 +102,12 @@ public class ShipPlayer : ShipBrain
     {
         OperatingShip = _testUnit;
         OperatingShip.shipBrain = this;
+        OperatingShip.OnEffect.AddListener(feedback => _shipPlayUI.UpdateUI());
         WorldManager.WeaponAimSystem.SetUnit(OperatingShip);
         keyBindWeapons.Add(new List<Weapon>(new Weapon[] { OperatingShip.weapons[0] }));
         keyBindWeapons.Add(new List<Weapon>(new Weapon[] { OperatingShip.weapons[1] }));
         thrustGear = new ClampedInt(-1, 3);
-        thrustGear.onValueChange.AddListener(newValue => UI.UpdateDisplay());
+        thrustGear.onValueChange.AddListener(newValue => UI.UpdateUI());
         KeyMovementMode = false;
         ActiveWeaponIndex = 0;
         AimDistance = 50;
@@ -382,7 +383,7 @@ public class ShipPlayer : ShipBrain
     public override void OnControlShipChange(ShipUnit oldShip, ShipUnit newShip)
     {
         thrustGear.Value = 0;
-        UI.UpdateDisplay();
+        UI.UpdateUI();
     }
 
     public override void Request(UnitRequest request)

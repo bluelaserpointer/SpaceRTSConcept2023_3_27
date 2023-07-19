@@ -18,11 +18,15 @@ public class ShipPlayUI : MonoBehaviour
     Transform _gearDisplayRoot;
     [SerializeField]
     List<Color> _gearButtonLitColors;
+    [SerializeField]
+    Image _healthImage;
 
-    public void UpdateDisplay()
+    public void UpdateUI()
     {
         if (_shipPlayer.OperatingUnit == null)
             return;
+        //ship status
+        _healthImage.fillAmount = _shipPlayer.OperatingShip.health.Ratio;
         //engine gear
         for (int childIndex = 0; childIndex < _gearDisplayRoot.childCount; ++childIndex)
         {

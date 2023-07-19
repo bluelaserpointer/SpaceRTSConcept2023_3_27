@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody))]
 public class ShipUnit : Unit
@@ -11,7 +12,7 @@ public class ShipUnit : Unit
     public float testRadius;
     public Visibility visibility;
     [SerializeField]
-    public float health;
+    public CappedValue health;
     [SerializeField]
     ShipMobility _mobility;
     [SerializeField]
@@ -19,8 +20,9 @@ public class ShipUnit : Unit
     float _velocityRotateRatio;
     [SerializeField]
     GameObject _destructedPrefab;
+    public UnityEvent<UnitEffectFeedback> OnEffect = new UnityEvent<UnitEffectFeedback>();
 
-    public override bool IsDead => health <= 0;
+    public override bool IsDead => health.IsEmpty;
     public DockPort AssignedDockPort { get; private set; }
     public bool IsDocked { get; private set; }
 
@@ -102,6 +104,7 @@ public class ShipUnit : Unit
     private void Awake()
     {
         Rigidbody = GetComponent<Rigidbody>();
+        health.Maximize();
         LinkAllModules();
         foreach (var part in GetComponentsInChildren<UnitDamageCollider>())
         {
@@ -203,18 +206,20 @@ public class ShipUnit : Unit
     public override UnitEffectFeedback Damage(Damage damage)
     {
         UnitEffectFeedback feedback = new UnitEffectFeedback();
-        health -= damage.damage;
+        health.Value -= damage.damage;
         feedback.damage = damage.damage;
-        if (health < 0)
+        if (IsDead)
         {
             Death();
             feedback.kill = true;
         }
+        OnEffect.Invoke(feedback);
         return feedback;
     }
     public override void Death()
     {
         base.Death();
+        health.Value = 0;
         if(_destructedPrefab != null)
         {
             GameObject destructedObj = Instantiate(_destructedPrefab);
