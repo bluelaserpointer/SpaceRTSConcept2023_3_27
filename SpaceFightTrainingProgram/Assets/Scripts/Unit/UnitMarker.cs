@@ -24,7 +24,7 @@ public class UnitMarker : ReusableAttachment<Unit>
         set
         {
             _markTarget = value;
-            unitNameText.text = value.name;
+            unitNameText.text = value.displayName;
         }
     }
     Unit _markTarget;

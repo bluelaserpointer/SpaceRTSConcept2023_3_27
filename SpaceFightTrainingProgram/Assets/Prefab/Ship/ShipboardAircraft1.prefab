@@ -4943,6 +4943,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab5209bbc1da5b647b8154ce58889dd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  displayName: Boomer
   shipBrain: {fileID: 5326976143153764859}
   testRadius: 0
   visibility: 0

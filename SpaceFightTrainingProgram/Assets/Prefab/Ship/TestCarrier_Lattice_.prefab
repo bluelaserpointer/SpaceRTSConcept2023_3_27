@@ -359,15 +359,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab5209bbc1da5b647b8154ce58889dd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  displayName: Lattice
   shipBrain: {fileID: 6318320703595762238}
   testRadius: 0
   visibility: 0
-  health: 2500
+  health:
+    _max: 1
   _mobility:
     main: 0
     sub: 0
     rotateForce: 0
+  _velocityRotateRatio: 0
   _destructedPrefab: {fileID: 8381709595511239484, guid: f02f9c65e943d7d468c442d52bd26de7, type: 3}
+  OnEffect:
+    m_PersistentCalls:
+      m_Calls: []
   useMainEngine: 0
   brakeMode: 0
 --- !u!1 &6318320703985593650

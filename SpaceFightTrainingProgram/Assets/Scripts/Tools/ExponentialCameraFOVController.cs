@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class ExponentialCameraFOVController : MonoBehaviour
 {
+    [SerializeField] Cinemachine.CinemachineFreeLook _freeLook;
     public float baseFOV = 60;
     public float pow = 2;
     public ClampedInt level = new ClampedInt(0, 5);
@@ -29,7 +30,18 @@ public class ExponentialCameraFOVController : MonoBehaviour
         if (wheelInput != 0)
         {
             level.Value += fovChange;
-            Camera.fieldOfView = baseFOV * AppliedChangeRatio;
+            SetFieldOfView(baseFOV* AppliedChangeRatio);
+        }
+    }
+    private void SetFieldOfView(float value)
+    {
+        if (_freeLook != null)
+        {
+            _freeLook.m_Lens.FieldOfView = value;
+        }
+        else
+        {
+            Camera.fieldOfView = value;
         }
     }
 }

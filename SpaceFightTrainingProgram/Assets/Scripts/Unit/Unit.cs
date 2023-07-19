@@ -7,6 +7,7 @@ using static UnityEngine.UI.CanvasScaler;
 [DisallowMultipleComponent]
 public abstract class Unit : MonoBehaviour
 {
+    public string displayName;
     public static string Tag = "Unit";
     public abstract UnitBrain Brain { get; }
     public Camp Camp => Brain?.Camp;
