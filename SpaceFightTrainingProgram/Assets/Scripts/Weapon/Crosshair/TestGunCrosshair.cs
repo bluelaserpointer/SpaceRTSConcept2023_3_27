@@ -63,7 +63,7 @@ public class TestGunCrosshair : MonoBehaviour
                 print("<!> invert gun raycast failed");
             }
         }
-        _aimMarker.transform.position = WorldManager.Player.Camera.WorldToScreenPoint(estimateHitPos).Set(z: 0);
+        WorldPositionMarker.Mark(_aimMarker, WorldManager.Player.Camera, estimateHitPos);
     }
     public void SetInAimRange(bool cond)
     {

@@ -71,13 +71,21 @@ public class DeflectionShootingGuide : MonoBehaviour
     }
     private void UpdateGuideAndLine()
     {
-        float ymaxBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position + camera.transform.up * 100)).y;
-        float yminBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position - camera.transform.up * 100)).y;
-        float xmaxBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position + camera.transform.right * 100)).x;
-        float xminBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position - camera.transform.right * 100)).x;
-        Vector2 boundSize = new Vector2(Mathf.Abs(xmaxBound - xminBound), Mathf.Abs(ymaxBound - yminBound));
-        colliderImage.transform.position = new Vector2((xmaxBound + xminBound) / 2, (ymaxBound + yminBound) / 2);
-        colliderImage.rectTransform.sizeDelta = boundSize;
+        if (camera.WorldToScreenPoint(targetRigidbody.transform.position).z <= 0)
+        {
+            colliderImage.enabled = false;
+        }
+        else
+        {
+            colliderImage.enabled = true;
+            float ymaxBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position + camera.transform.up * 100)).y;
+            float yminBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position - camera.transform.up * 100)).y;
+            float xmaxBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position + camera.transform.right * 100)).x;
+            float xminBound = camera.WorldToScreenPoint(targetRigidbody.ClosestPointOnBounds(targetRigidbody.position - camera.transform.right * 100)).x;
+            Vector2 boundSize = new Vector2(Mathf.Abs(xmaxBound - xminBound), Mathf.Abs(ymaxBound - yminBound));
+            colliderImage.transform.position = new Vector2((xmaxBound + xminBound) / 2, (ymaxBound + yminBound) / 2);
+            colliderImage.rectTransform.sizeDelta = boundSize;
+        }
         if (!Hitable)
         {
             lineRenderer.enabled = false;
@@ -88,7 +96,7 @@ public class DeflectionShootingGuide : MonoBehaviour
             lineRenderer.enabled = true;
             targetImage.enabled = true;
             lineRenderer.SetPositions(new Vector3[] { targetRigidbody.position, EstimateTargetPosition });
-            targetImage.transform.position = camera.WorldToScreenPoint(EstimateTargetPosition);
+            WorldPositionMarker.Mark(targetImage.gameObject, camera, EstimateTargetPosition);
         }
     }
 }

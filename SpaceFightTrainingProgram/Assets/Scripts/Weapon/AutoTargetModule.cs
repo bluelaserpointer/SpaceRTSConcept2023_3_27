@@ -73,7 +73,7 @@ public class AutoTargetModule : MonoBehaviour
         }
         _targetUnit = targetUnit;
         Transform markerTf = _targetMarkerNest.Get();
-        markerTf.transform.position = camera.WorldToScreenPoint(_targetUnit.transform.position).Set(z: 0);
+        WorldPositionMarker.Mark(markerTf.gameObject, camera, _targetUnit.transform.position);
     }
     public void HelpTarget(Weapon weapon)
     {

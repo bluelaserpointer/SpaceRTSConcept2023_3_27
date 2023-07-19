@@ -18,6 +18,7 @@ public class Tail : MonoBehaviour
     bool negateDisorientedVelocity;
 
     LineRenderer lineRenderer;
+    Vector3 localOffset;
 
     class LinePoint
     {
@@ -35,6 +36,7 @@ public class Tail : MonoBehaviour
     private void Awake()
     {
         lineRenderer = GetComponent<LineRenderer>();
+        localOffset = transform.localPosition;
     }
     private void FixedUpdate()
     {
@@ -54,7 +56,7 @@ public class Tail : MonoBehaviour
         {
             newPointVelocity += refRigidbody.velocity - Vector3.Project(refRigidbody.velocity, refRigidbody.transform.forward);
         }
-        linePoints.Add(new LinePoint(refRigidbody.transform.position, newPointVelocity));
+        linePoints.Add(new LinePoint(refRigidbody.transform.TransformPoint(localOffset), newPointVelocity));
         float fadeStartTargetTime = Time.timeSinceLevelLoad - fadeStartTime;
         float fadeEndTargetTime = Time.timeSinceLevelLoad - fadeEndTime;
         int fadeStartId = -1, fadeEndId = -1;
